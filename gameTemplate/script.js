@@ -23,6 +23,11 @@ var scoreText;
 var playButton;
 var instructionButton;
 var menuButton;
+var left,right,up,down = false;
+var speed;
+var moving;
+var bullets = [];
+var shooting;
 
 manifest = [
     {src:"images/title.jpg", id:"title"},
@@ -92,7 +97,7 @@ function loadComplete(evt){
     instructionScreen.visible = false;
     gameoverScreen.visible = false;
     
-     var walkSheet = new createjs.SpriteSheet({
+     /*var walkSheet = new createjs.SpriteSheet({
         images: [queue.getResult("mySprites")],
         frames: [[160,0,19,49,0,10.05,48.6],[179,0,34,44,0,17.05,43.6],[213,0,22,46,0,9.05,45.6],[235,0,17,49,0,8.05,48.6],[0,49,25,49,0,10.05,48.6],[25,49,31,46,0,14.05,45.6],[56,49,33,44,0,16.05,43.6],[89,49,30,44,0,17.05,43.6],[119,49,28,46,0,17.05,45.6],[147,49,19,49,0,10.05,48.6],[166,49,23,49,0,14.05,48.6],[189,49,31,46,0,16.05,45.6],[220,49,34,44,0,17.05,43.6],[0,98,19,49,0,9.05,48.6],[19,98,34,44,0,17.05,43.6],[53,98,22,46,0,13.05,45.6],[75,98,17,49,0,9.05,48.6],[92,98,25,49,0,15.05,48.6],[117,98,31,46,0,17.05,45.6],[148,98,33,44,0,17.05,43.6],[181,98,30,44,0,13.05,43.6],[211,98,28,46,0,11.05,45.6],[0,147,19,49,0,9.05,48.6],[19,147,23,49,0,9.05,48.6],[42,147,31,46,0,15.05,45.6],[73,147,34,44,0,17.05,43.6]],
         animations: {
@@ -101,15 +106,13 @@ function loadComplete(evt){
             standLeft: [13, 13, "standLeft"],
             walkLeft: [14, 25, "walkLeft", .5]
             }     
-        });
+        });*/
     
-    walk = new createjs.Sprite(walkSheet);
-    walk.x=100;
-    walk.y=200;
-    walk.gotoAndPlay("walkRight");
+    walk = new createjs.Shape();
+    walk.graphics.beginFill("#000").drawRect(0,0,20,20);
     stage.addChild(walk);
-    
-    
+    walk.x = 390;
+    walk.y = 510;
     stage.addChild(playButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
@@ -150,6 +153,9 @@ function main() {
     writeScore();
     mouseInit();
     state = gameMode.TITLE;
+    speed = 6;
+    moving = false;
+    shooting = false;
 }
 
 function showTitle(){
@@ -251,17 +257,53 @@ function runGameTimer() {
             stage.removeChild(timer);
             writeTimer();
         }
-        if(gameTimer >= 5){
-           state = gameMode.GAMEOVER;
-            resetGameTimer();
-        }
     }
-}
+        if(left && walk.x > 0){
+            walk.x -= speed;
+        }
+        if(right && walk.x < 780){
+            walk.x += speed;
+        }
+        if(up && walk.y > 500){
+            walk.y -= speed;
+        }
+        if(down && walk.y < 580){
+            walk.y += speed;
+        }
+    if(shooting){
+        shoot();
+    }
+    var toRemove = [];
+    for(var i = 0; i < bullets.length; i++){
+        if(bullets[i].y <= 0){
+            toRemove.push(i);
+        }
+        bullets[i].y -= 10;
+    }
+    if(toRemove.length >= 1){
+        stage.removeChild(bullets[toRemove[0]]);
+        bullets.splice(toRemove[0],1);   
+    }
+    
+            
+    }
+    
+    
+
 
 function resetGameTimer() {
     gameTimer = 0;
     frameCount = 0;
     score = 0;
+}
+
+function shoot(){
+    var bullet = new createjs.Shape();
+    bullet.graphics.beginFill("#000").drawRect(0,0,5,5);
+    bullet.x = walk.x + 7;
+    bullet.y = walk.y;
+    stage.addChild(bullet);
+    bullets.push(bullet);
 }
 
 function mouseInit() {
@@ -274,6 +316,7 @@ function mouseInit() {
 
 main();
 document.onkeydown = handleKeyDown;
+document.onkeyup = handleKeyUp;
 
 var KEYCODE_LEFT = 37;
 var KEYCODE_UP = 38;
@@ -286,16 +329,36 @@ var KEYCODE_S = 83;
 var KEYCODE_D = 68;
 
 function handleKeyDown(evt) {
-    if(!evt){ var evt = window.event; } 
+    if(!evt){ var evt = window.event; }
     switch(evt.keyCode) {
-        case KEYCODE_LEFT:  console.log("Left"); return false;
-        case KEYCODE_RIGHT: console.log("Right"); return false;
-        case KEYCODE_UP:    console.log("Up"); return false;
-        case KEYCODE_DOWN:  console.log("Down"); return false;
-        case KEYCODE_SPACE:  console.log("Space"); return false;
-        case KEYCODE_W:  console.log("W"); return false;
-        case KEYCODE_A:  console.log("A"); return false;
-        case KEYCODE_S:  console.log("S"); return false;
-        case KEYCODE_D:  console.log("D"); return false;    
+        case KEYCODE_LEFT:  left = true; return false;
+        case KEYCODE_RIGHT: right=true;return false;
+        case KEYCODE_UP:   up = true; return false;
+        case KEYCODE_DOWN:  down = true;return false;
+        case KEYCODE_SPACE:  shooting = true; return false;
+        case KEYCODE_W:   up = true;return false;
+        case KEYCODE_A:  left=true;return false;
+        case KEYCODE_S:  down = true;return false;
+        case KEYCODE_D:  right = true;return false;  
     }
+    
+}
+
+function handleKeyUp(evt) {
+    if(!evt){ var evt = window.event; }
+switch(evt.keyCode) {
+        case KEYCODE_LEFT:  left = false; return false;
+        case KEYCODE_RIGHT: right=false;return false;
+        case KEYCODE_UP:   up = false; return false;
+        case KEYCODE_DOWN:  down = false;return false;
+        case KEYCODE_SPACE:  shooting = false; return false;
+        case KEYCODE_W:   up = false;return false;
+        case KEYCODE_A:  left=false;return false;
+        case KEYCODE_S:  down = false;return false;
+        case KEYCODE_D:  right = false;return false;  
+    }
+    
+       
+
+    
 }
