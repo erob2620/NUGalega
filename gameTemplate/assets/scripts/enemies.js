@@ -1,7 +1,7 @@
 var enemyList = [];
 var enemyContainer;
 var maxEnemies = 8;
-var maxBullets = 3;
+var maxBullets = 2;
 function Enemy(xPos, yPos, health) {
     this.xPos = xPos;
     this.yPos = yPos;
@@ -39,11 +39,14 @@ Enemy.prototype.removeBullet = function(bulletIndex) {
     this.bullets[bulletIndex].remove();
     this.bullets.splice(bulletIndex,1);
 };
-Enemy.prototype.die = function() {
+Enemy.prototype.removeAllBullets = function() {
     for(var i = 0; i < this.bullets.length; i++) {
-        this.removeBullet[i];
+        this.bullets[i].remove();
     }
-    console.log(this.bullets.length);
+    this.bullets = [];
+}
+Enemy.prototype.die = function() {
+    this.removeAllBullets();
     enemyList.splice(enemyList.indexOf(this), 1);
     enemyContainer.removeChild(this.rectangle);
 };
@@ -59,11 +62,11 @@ Enemy.prototype.move = function() {
         this.rectangle.y += 2;
         this.yPos += 2;
         this.movedSouthAmount += 2;
+        if(this.yPos > 200) this.die();
         if(this.movedSouthAmount === 40) {
             this.moveForward = false;
             this.movedSouthAmount = 0;
         }
-        if(this.yPos > 200) this.die();
     }
     this.shotTimer++;
     if(this.shotDelay <= this.shotTimer) {
