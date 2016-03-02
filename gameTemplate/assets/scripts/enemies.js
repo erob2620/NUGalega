@@ -1,18 +1,24 @@
 var enemyList = [];
+var enemyContainer;
+var maxEnemies = 8;
+var maxBullets = 3;
 function Enemy(xPos, yPos, health) {
     this.xPos = xPos;
     this.yPos = yPos;
     this.bullets = [];
     this.health = health;
+    this.direction = -1;
+    this.moveForward = false;
+    this.movedSouthAmount = 0;
+    this.shotDelay = 45;
+    this.shotTimer = 0;
     this.rectangle = new createjs.Shape();
-    console.log(this.xPos);
-    this.rectangle.graphics.beginFill('#666').drawRect(this.xPos, this.yPos, 20, 20);
+    this.rectangle.graphics.beginFill('#666').drawRect(0, 0, 20, 20);
+    this.rectangle.x = this.xPos;
+    this.rectangle.y = this.yPos;
     this.rectangle.setBounds(this.xPos, this.yPos, 20, 20);
     this.rectangle.regX = this.rectangle.getBounds().width/2;
     this.rectangle.regY = this.rectangle.getBounds().height/2;
-    this.rectangle.x = this.xPos;
-    this.rectangle.y = this.yPos;
-    console.log(this.rectangle);
     this.spawn();
 }
 Enemy.prototype.spawn = function() {
@@ -21,27 +27,60 @@ Enemy.prototype.spawn = function() {
     this.draw();
 };
 Enemy.prototype.shoot = function() {
-    var bullet = null;
-    //create bullet
+    var bullet = new Bullet(this.xPos + 3, this.yPos + 11, false);
     
+    //create bullet
     // add bullet to bullet array
     this.bullets.push(bullet);
+    bullet.add();
 };
 Enemy.prototype.removeBullet = function(bulletIndex) {
     //if bullet moved off screen or hit player remove it
+    this.bullets[bulletIndex].remove();
     this.bullets.splice(bulletIndex,1);
 };
 Enemy.prototype.die = function() {
+    for(var i = 0; i < this.bullets.length; i++) {
+        this.removeBullet[i];
+    }
+    console.log(this.bullets.length);
     enemyList.splice(enemyList.indexOf(this), 1);
-    stage.removeChild(this.rectangle);
+    enemyContainer.removeChild(this.rectangle);
 };
 Enemy.prototype.move = function() {
-    this.xPos -= 2;
-    this.rectangle.x -= 2;
-    console.log(this.rectangle.x);
-    if(this.rectangle.x < -15) {
-        this.rectangle.x = stage.canvas.width;
+    if(!this.moveForward) {
+        this.xPos += this.direction * 2;
+        this.rectangle.x += this.direction * 2;
+        if(this.rectangle.x < 25 || this.rectangle.x > 780) {
+            this.direction *= -1;
+            this.moveForward = true;
+        }
+    } else {
+        this.rectangle.y += 2;
+        this.yPos += 2;
+        this.movedSouthAmount += 2;
+        if(this.movedSouthAmount === 40) {
+            this.moveForward = false;
+            this.movedSouthAmount = 0;
+        }
+        if(this.yPos > 200) this.die();
     }
+    this.shotTimer++;
+    if(this.shotDelay <= this.shotTimer) {
+        if(Math.floor(Math.random() * 10 + 1) <= 1) {
+            if(this.bullets.length < maxBullets) {
+                this.shotTimer = 0;
+                this.shoot();
+            }
+        }
+    } 
+    for(var i = 0; i < this.bullets.length; i++) {
+        this.bullets[i].move();
+        if(this.bullets[i].bulletShape.y > 575) {
+            this.removeBullet(i);
+        }
+    }
+    
 }
 Enemy.prototype.collisionDetection = function(bulletX, bulletY) {
     //check the bounds of the enemy with reference to the bullet
@@ -50,7 +89,7 @@ Enemy.prototype.takeDamage = function() {
     this.health--;
 }
 Enemy.prototype.draw = function() {
-    stage.addChild(this.rectangle);
+    enemyContainer.addChild(this.rectangle);
 }
 function moveAllEnemies() {
     for(var i = 0; i < enemyList.length; i++) {
@@ -73,10 +112,16 @@ function checkEnemyDeath(playerBullets) {
 }
 
 function createEnemy() {
-    var enemy = new Enemy(820, 40, 2);
+    if(enemyList.length < maxEnemies) {
+        var enemy = new Enemy(770, 100, 2);
+    }
 }
 function drawEnemies() {
     for(var i = 0; i < enemyList.length; i++) {
         enemyList[i].draw();
     }
+}
+function setupEnemies() {
+    enemyContainer = new createjs.Container();
+    stage.addChild(enemyContainer);
 }

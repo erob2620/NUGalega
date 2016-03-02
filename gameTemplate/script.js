@@ -23,17 +23,14 @@ var scoreText;
 var playButton;
 var instructionButton;
 var menuButton;
-<<<<<<< HEAD
 var cacheVersion = new Date().getTime();
 var jsEnd = '.js?a=' + cacheVersion;
-=======
 var left,right,up,down = false;
 var speed;
 var moving;
 var bullets = [];
 var shooting;
 
->>>>>>> d06e23c2428013a3bc6ced385f13969ace79019a
 manifest = [
     {src:"images/title.jpg", id:"title"},
     {src:"images/instruction.jpg", id:"instruction"},
@@ -44,7 +41,8 @@ manifest = [
     {src:"images/playButton.jpg", id:"playButton"},
     {src:"images/menuButton.jpg", id:"menuButton"},
     {src:"music/music.mp3", id:"music"},
-    {src: 'scripts/enemies' + jsEnd}
+    {src: 'scripts/enemies' + jsEnd},
+    {src: 'scripts/bullet' + jsEnd}
 ];
 
 function setupCanvas() {
@@ -159,17 +157,13 @@ function main() {
     writeCoordinates();
     writeScore();
     mouseInit();
-    createEnemies();
-    drawEnemies();
+    setupEnemies();
     state = gameMode.TITLE;
-<<<<<<< HEAD
-    createjs.Ticker.addEventListener("tick", loop);
-    createjs.Ticker.setFPS(FPS);
-=======
     speed = 6;
     moving = false;
     shooting = false;
->>>>>>> d06e23c2428013a3bc6ced385f13969ace79019a
+    createjs.Ticker.addEventListener("tick", loop);
+    createjs.Ticker.setFPS(FPS);
 }
 
 function showTitle(){
@@ -186,7 +180,7 @@ function showTitle(){
     menuButton.visible = false;
     scoreText.visible = false;
 }
-
+var count = 0;
 function showGame(){
     //runGameTimer();
     stage.removeChild(coordinates);
@@ -203,6 +197,11 @@ function showGame(){
     instructionButton.visible = false;
     menuButton.visible = false;
     scoreText.visible = true;
+    count++;
+    if(count === FPS) {
+        createEnemy();
+        count = 0;
+    } 
     moveAllEnemies();
 }
 
