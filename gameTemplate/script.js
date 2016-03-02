@@ -28,6 +28,9 @@ var speed;
 var moving;
 var bullets = [];
 var shooting;
+var health;
+var healthNodes = [];
+var hud;
 
 manifest = [
     {src:"images/title.jpg", id:"title"},
@@ -113,9 +116,22 @@ function loadComplete(evt){
     stage.addChild(walk);
     walk.x = 390;
     walk.y = 510;
+    hud = new createjs.Shape();
+    hud.graphics.beginFill("#aaa").drawRect(0,0,100,300);
+    hud.x = 700;
+    hud.y = 300;
     stage.addChild(playButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
+    stage.addChild(hud);
+    for(var i = 320; i < 420; i += 20){
+        var healthBlock = new createjs.Shape();
+        healthBlock.graphics.beginFill("#f00").drawRect(0,0,20,20);
+        healthBlock.x = 740;
+        healthBlock.y = i;
+        stage.addChild(healthBlock);
+        healthNodes.push(healthBlock);
+    }
 }
 
 function writeTimer(){
@@ -134,13 +150,19 @@ stage.addChild(coordinates);
 
 function writeScore(){
     scoreText = new createjs.Text("Score: " + score, "12px Arial", "#000000");
-    scoreText.x = 10;
-    scoreText.y = 90;
+    scoreText.x = 730;
+    scoreText.y = 500;
     stage.addChild(scoreText);
 }
 
 function addScore(increment){
     score += increment
+}
+
+function damage(){
+    health--;
+    stage.removeChild(healthNodes[0]);
+    healthNodes.splice(0,1);
 }
 
 function main() {
@@ -156,6 +178,7 @@ function main() {
     speed = 6;
     moving = false;
     shooting = false;
+    health = 5;
 }
 
 function showTitle(){
@@ -171,6 +194,10 @@ function showTitle(){
     instructionButton.visible = true;
     menuButton.visible = false;
     scoreText.visible = false;
+    for(var i = 0; i < healthNodes.length; i++){
+        healthNodes[i].visible = false;
+    }
+    hud.visible = false;
 }
 
 function showGame(){
@@ -189,6 +216,10 @@ function showGame(){
     instructionButton.visible = false;
     menuButton.visible = true;
     scoreText.visible = true;
+    for(var i = 0; i < healthNodes.length; i++){
+        healthNodes[i].visible = true;
+    }
+    hud.visible = true;
 }
 
 function showGameOver(){
@@ -204,6 +235,10 @@ function showGameOver(){
     instructionButton.visible = true;
     menuButton.visible = true;
     scoreText.visible = false;
+    for(var i = 0; i < healthNodes.length; i++){
+        healthNodes[i].visible = false;
+    }
+    hud.visible = false;
 }
 
 function showInstructions(){
@@ -219,6 +254,10 @@ function showInstructions(){
     instructionButton.visible = false;
     menuButton.visible = true;
     scoreText.visible = false;
+    for(var i = 0; i < healthNodes.length; i++){
+        healthNodes[i].visible = false;
+    }
+    hud.visible = false;
 }
 
 var FPS = 30;
@@ -257,6 +296,9 @@ function runGameTimer() {
             stage.removeChild(timer);
             writeTimer();
         }
+        if(gameTimer % 5 == 0){
+            damage();
+        }
     }
         if(left && walk.x > 0){
             walk.x -= speed;
@@ -284,7 +326,9 @@ function runGameTimer() {
         stage.removeChild(bullets[toRemove[0]]);
         bullets.splice(toRemove[0],1);   
     }
-    
+    if(health == 0){
+        state = gameMode.GAMEOVER;
+    }
             
     }
     
