@@ -23,7 +23,8 @@ var scoreText;
 var playButton;
 var instructionButton;
 var menuButton;
-
+var cacheVersion = new Date().getTime();
+var jsEnd = '.js?a=' + cacheVersion;
 manifest = [
     {src:"images/title.jpg", id:"title"},
     {src:"images/instruction.jpg", id:"instruction"},
@@ -33,7 +34,8 @@ manifest = [
     {src:"images/instructionButton.jpg", id:"instructionButton"},
     {src:"images/playButton.jpg", id:"playButton"},
     {src:"images/menuButton.jpg", id:"menuButton"},
-    {src:"music/music.mp3", id:"music"}
+    {src:"music/music.mp3", id:"music"},
+    {src: 'scripts/enemies' + jsEnd}
 ];
 
 function setupCanvas() {
@@ -42,7 +44,9 @@ function setupCanvas() {
     canvas.height = 600;
     stage = new createjs.Stage(canvas); //makes stage object from the canvas
     stage.enableMouseOver();
+    loadFiles();
 }
+setupCanvas();
 
 function createButtons(){
     
@@ -113,6 +117,7 @@ function loadComplete(evt){
     stage.addChild(playButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
+    main();
 }
 
 function writeTimer(){
@@ -141,15 +146,17 @@ function addScore(increment){
 }
 
 function main() {
-    loadFiles();
-    setupCanvas();
     resetGameTimer();
     createButtons();
     writeTimer();   
     writeCoordinates();
     writeScore();
     mouseInit();
+    createEnemies();
+    drawEnemies();
     state = gameMode.TITLE;
+    createjs.Ticker.addEventListener("tick", loop);
+    createjs.Ticker.setFPS(FPS);
 }
 
 function showTitle(){
@@ -168,11 +175,11 @@ function showTitle(){
 }
 
 function showGame(){
-    runGameTimer();
+    //runGameTimer();
     stage.removeChild(coordinates);
     writeCoordinates();
     playing = true;
-    walk.visible = true;
+    walk.visible = false;
     titleScreen.visible = false;
     gameoverScreen.visible = false;
     backgroundScreen.visible = true;
@@ -181,8 +188,9 @@ function showGame(){
     coordinates.visible = true;
     playButton.visible = false;
     instructionButton.visible = false;
-    menuButton.visible = true;
+    menuButton.visible = false;
     scoreText.visible = true;
+    moveAllEnemies();
 }
 
 function showGameOver(){
@@ -236,8 +244,6 @@ function loop() {
     
        stage.update();
 }
-createjs.Ticker.addEventListener("tick", loop);
-createjs.Ticker.setFPS(FPS);
 
 var gameTimer;
 var frameCount = 0;
@@ -272,7 +278,6 @@ function mouseInit() {
 }
 
 
-main();
 document.onkeydown = handleKeyDown;
 
 var KEYCODE_LEFT = 37;
