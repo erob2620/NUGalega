@@ -1,5 +1,4 @@
 var stage;
-var timer;
 var queue;
 var circle;
 var titleScreen;
@@ -31,6 +30,7 @@ var shooting;
 var health;
 var healthNodes = [];
 var hud;
+var attackPower;
 
 manifest = [
     {src:"images/title.jpg", id:"title"},
@@ -134,12 +134,7 @@ function loadComplete(evt){
     }
 }
 
-function writeTimer(){
-    timer = new createjs.Text(gameTimer, "12px Arial", "#000000");
-timer.x = 10; 
-timer.y = 50; 
-stage.addChild(timer);
-}
+
 
 function writeCoordinates(){
      coordinates = new createjs.Text("(" + mouseX + "," + mouseY + ")", "12px Arial", "#000000");
@@ -169,8 +164,7 @@ function main() {
     loadFiles();
     setupCanvas();
     resetGameTimer();
-    createButtons();
-    writeTimer();   
+    createButtons(); 
     writeCoordinates();
     writeScore();
     mouseInit();
@@ -179,6 +173,7 @@ function main() {
     moving = false;
     shooting = false;
     health = 5;
+    attackPower = 1;
 }
 
 function showTitle(){
@@ -188,7 +183,6 @@ function showTitle(){
     gameoverScreen.visible = false;
     backgroundScreen.visible = false;
     instructionScreen.visible = false;
-    timer.visible = false;
     coordinates.visible = false;
     playButton.visible = true;
     instructionButton.visible = true;
@@ -210,7 +204,6 @@ function showGame(){
     gameoverScreen.visible = false;
     backgroundScreen.visible = true;
     instructionScreen.visible = false;
-    timer.visible = true;
     coordinates.visible = true;
     playButton.visible = false;
     instructionButton.visible = false;
@@ -229,7 +222,6 @@ function showGameOver(){
     gameoverScreen.visible = true;
     backgroundScreen.visible = false;
     instructionScreen.visible = false;
-    timer.visible = false;
     coordinates.visible = false;
     playButton.visible = true;
     instructionButton.visible = true;
@@ -248,7 +240,6 @@ function showInstructions(){
     gameoverScreen.visible = false;
     backgroundScreen.visible = false;
     instructionScreen.visible = true;
-    timer.visible = false;
     coordinates.visible = false;
     playButton.visible = true;
     instructionButton.visible = false;
@@ -371,6 +362,7 @@ var KEYCODE_W = 87;
 var KEYCODE_A = 65;
 var KEYCODE_S = 83;
 var KEYCODE_D = 68;
+var KEYCODE_J = 74;
 
 function handleKeyDown(evt) {
     if(!evt){ var evt = window.event; }
@@ -384,6 +376,7 @@ function handleKeyDown(evt) {
         case KEYCODE_A:  left=true;return false;
         case KEYCODE_S:  down = true;return false;
         case KEYCODE_D:  right = true;return false;  
+        case KEYCODE_J: health = 10; attackPower = 5; return false;
     }
     
 }
