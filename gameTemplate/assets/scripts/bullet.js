@@ -1,3 +1,5 @@
+var bulletSpeed = 5;
+
 function Bullet(xPos, yPos, isPlayerBullet) {
     this.xPos = xPos;
     this.yPos = yPos;
@@ -11,7 +13,7 @@ function Bullet(xPos, yPos, isPlayerBullet) {
     this.bulletShape.regY = this.bulletShape.getBounds().height/2;
 }
 Bullet.prototype.move = function() {
-    this.bulletShape.y = (this.playerBullet)? this.bulletShape.y - 5 : this.bulletShape.y + 5;
+    this.bulletShape.y = (this.playerBullet)? this.bulletShape.y - bulletSpeed : this.bulletShape.y + bulletSpeed;
 }
 Bullet.prototype.remove = function() {
     enemyContainer.removeChild(this.bulletShape);
