@@ -163,9 +163,9 @@ function loadComplete(evt){
     
     walk = new createjs.Shape();
     walk.graphics.beginFill("#000").drawRect(0,0,20,20);
-    stage.addChild(walk);
     walk.x = 390;
     walk.y = 510;
+    stage.addChild(walk);
     hud = new createjs.Shape();
     hud.graphics.beginFill("#aaa").drawRect(0,0,100,300);
     hud.x = 700;
@@ -268,7 +268,7 @@ function showGame(){
     stage.removeChild(coordinates);
     writeCoordinates();
     playing = true;
-    walk.visible = false;
+    walk.visible = true;
     titleScreen.visible = false;
     gameoverScreen.visible = false;
     backgroundScreen.visible = true;
@@ -289,7 +289,12 @@ function showGame(){
         createEnemy();
         count = 0;
     } 
+    if(isLevelCleared()) {
+        console.log('you cleared the level');
+        state = gameMode.SHOP;
+    }
     moveAllEnemies();
+    runGameTimer();
     for(var i = 0; i < healthNodes.length; i++){
         healthNodes[i].visible = true;
     }
@@ -304,7 +309,7 @@ function showGameOver(){
     backgroundScreen.visible = false;
     instructionScreen.visible = false;
     shopScreen.visible = false;
-    timer.visible = false;
+    //timer.visible = false;
     coordinates.visible = false;
     playButton.visible = true;
     instructionButton.visible = true;
@@ -349,7 +354,7 @@ function showShop(){
     backgroundScreen.visible = false;
     shopScreen.visible = true;
     instructionScreen.visible = false;
-    timer.visible = false;
+    //timer.visible = false;
     coordinates.visible = false;
     playButton.visible = true;
     instructionButton.visible = false;
@@ -400,11 +405,11 @@ function runGameTimer() {
     if(frameCount%(FPS/10) === 0) {
         gameTimer = frameCount/(FPS);
         if(gameTimer*10 % 1 === 0){
-            stage.removeChild(timer);
-            writeTimer();
+            //stage.removeChild(timer);
+            //writeTimer();
         }
         if(gameTimer % 5 == 0){
-            damage();
+            //damage();
         }
     }
         if(left && walk.x > 0){
@@ -424,15 +429,17 @@ function runGameTimer() {
     }
     var toRemove = [];
     for(var i = 0; i < bullets.length; i++){
-        if(bullets[i].y <= 0){
-            toRemove.push(i);
+        if(bullets[i].y <= 10){
+            //toRemove.push(i);
+            stage.removeChild(bullets[i]);
+            bullets.splice(i,1);  
+            i--;
+        } else {
+            bullets[i].y -= 10;
         }
-        bullets[i].y -= 10;
     }
-    if(toRemove.length >= 1){
-        stage.removeChild(bullets[toRemove[0]]);
-        bullets.splice(toRemove[0],1);   
-    }
+//    if(toRemove.length >= 1){
+//    }
     if(health == 0){
         state = gameMode.GAMEOVER;
     }
@@ -449,6 +456,9 @@ function shoot(){
     bullet.graphics.beginFill("#000").drawRect(0,0,5,5);
     bullet.x = walk.x + 7;
     bullet.y = walk.y;
+    bullet.setBounds(bullet.x, bullet.y, 5, 5);
+    bullet.regX = bullet.getBounds().width / 2;
+    bullet.regY = bullet.getBounds().height / 2;
     stage.addChild(bullet);
     bullets.push(bullet);
 }

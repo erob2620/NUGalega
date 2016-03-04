@@ -8,7 +8,7 @@ function Bullet(xPos, yPos, isPlayerBullet) {
     this.bulletShape.graphics.beginFill('#000').drawRect(0, 0, 5, 10);
     this.bulletShape.x = this.xPos;
     this.bulletShape.y = this.yPos;
-    this.bulletShape.setBounds(this.xPos, this.yPos, 5, 10);
+    this.bulletShape.setBounds(this.bulletShape.x, this.bulletShape.y, 5, 10);
     this.bulletShape.regX = this.bulletShape.getBounds().width/2;
     this.bulletShape.regY = this.bulletShape.getBounds().height/2;
 }

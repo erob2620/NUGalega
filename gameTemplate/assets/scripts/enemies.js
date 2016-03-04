@@ -1,6 +1,7 @@
 var enemyList = [];
 var enemyContainer;
 var maxEnemies = 8;
+var levelEnemiesLeft = 10;
 var maxBullets = 2;
 function Enemy(xPos, yPos, health) {
     this.xPos = xPos;
@@ -13,10 +14,10 @@ function Enemy(xPos, yPos, health) {
     this.shotDelay = 45;
     this.shotTimer = 0;
     this.rectangle = new createjs.Shape();
-    this.rectangle.graphics.beginFill('#666').drawRect(0, 0, 20, 20);
+    this.rectangle.graphics.beginFill('#666').drawRect(0, 0, 35, 20);
     this.rectangle.x = this.xPos;
     this.rectangle.y = this.yPos;
-    this.rectangle.setBounds(this.xPos, this.yPos, 20, 20);
+    this.rectangle.setBounds(this.xPos, this.yPos, 35, 20);
     this.rectangle.regX = this.rectangle.getBounds().width/2;
     this.rectangle.regY = this.rectangle.getBounds().height/2;
     this.spawn();
@@ -62,7 +63,7 @@ Enemy.prototype.move = function() {
         this.rectangle.y += 2;
         this.yPos += 2;
         this.movedSouthAmount += 2;
-        if(this.yPos > 200) this.die();
+        if(this.yPos > 500) this.die();
         if(this.movedSouthAmount === 40) {
             this.moveForward = false;
             this.movedSouthAmount = 0;
@@ -81,12 +82,32 @@ Enemy.prototype.move = function() {
         this.bullets[i].move();
         if(this.bullets[i].bulletShape.y > 575) {
             this.removeBullet(i);
+            i--;
+        }
+    }
+    for(var i = 0; i < bullets.length; i++) {
+            // if an enemy collides with a player bullet
+        if(this.collisionDetection(bullets[i])) {
+            stage.removeChild(bullets[i]);
+            bullets.splice(i,1);
+            i--;
+            this.takeDamage();
+            // if health goes below 0
+            if(this.health === 0) {
+                this.die();
+                break;
+            }
         }
     }
     
 }
-Enemy.prototype.collisionDetection = function(bulletX, bulletY) {
+Enemy.prototype.collisionDetection = function(bullet) {
     //check the bounds of the enemy with reference to the bullet
+    if(this.rectangle.x - 10 >= bullet.x + bullet.getBounds().width ||
+       this.rectangle.x + this.rectangle.getBounds().width - 10 <= bullet.x ||
+       this.rectangle.y - 5 >= bullet.y + bullet.getBounds().height ||
+       this.rectangle.y + this.rectangle.getBounds().height <= bullet.y) return false;
+    return true;
 };
 Enemy.prototype.takeDamage = function() {
     this.health--;
@@ -99,24 +120,10 @@ function moveAllEnemies() {
         enemyList[i].move();
     }
 }
-function checkEnemyDeath(playerBullets) {
-    for(var i = 0; i < enemyList.length; i++) {
-        for(var j = 0; j < playerBullets.length; j++) {
-            // if an enemy collides with a player bullet
-                // enemy takes damage 
-                playerBullets.splice(playerBullets[i],1);
-                enemyList[i].takeDamage();
-                // if health goes below 0
-                if(enemyList[i].heath === 0) {
-                    enemyList[i].die();
-                }
-        }
-    }
-}
-
 function createEnemy() {
-    if(enemyList.length < maxEnemies) {
+    if(enemyList.length < maxEnemies && levelEnemiesLeft != 0) {
         var enemy = new Enemy(770, 100, 2);
+        levelEnemiesLeft--;
     }
 }
 function drawEnemies() {
@@ -127,4 +134,7 @@ function drawEnemies() {
 function setupEnemies() {
     enemyContainer = new createjs.Container();
     stage.addChild(enemyContainer);
+}
+function isLevelCleared() {
+    return (enemyList.length === 0 && levelEnemiesLeft === 0);
 }
