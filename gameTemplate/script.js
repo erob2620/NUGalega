@@ -165,9 +165,9 @@ function loadComplete(evt){
     
     walk = new createjs.Shape();
     walk.graphics.beginFill("#000").drawRect(0,0,20,20);
-    stage.addChild(walk);
     walk.x = 390;
     walk.y = 510;
+    stage.addChild(walk);
     hud = new createjs.Shape();
     hud.graphics.beginFill("#aaa").drawRect(0,0,100,300);
     hud.x = 700;
@@ -299,7 +299,12 @@ function showGame(){
         createEnemy();
         count = 0;
     } 
+    if(isLevelCleared()) {
+        console.log('you cleared the level');
+        state = gameMode.SHOP;
+    }
     moveAllEnemies();
+    runGameTimer();
     for(var i = 0; i < healthNodes.length; i++){
         healthNodes[i].visible = true;
     }
@@ -313,7 +318,6 @@ function showGameOver(){
     gameoverScreen.visible = true;
     backgroundScreen.visible = false;
     instructionScreen.visible = false;
-    shopScreen.visible = false;
     coordinates.visible = false;
     playButton.visible = true;
     instructionButton.visible = true;
@@ -407,8 +411,6 @@ function runGameTimer() {
     frameCount += 1;
     if(frameCount%(FPS/10) === 0) {
         gameTimer = frameCount/(FPS);
-        
-        
     }
     
         if(left && walk.x > 0){
@@ -437,15 +439,17 @@ function runGameTimer() {
     }
     var toRemove = [];
     for(var i = 0; i < bullets.length; i++){
-        if(bullets[i].y <= 0){
-            toRemove.push(i);
+        if(bullets[i].y <= 10){
+            //toRemove.push(i);
+            stage.removeChild(bullets[i]);
+            bullets.splice(i,1);  
+            i--;
+        } else {
+            bullets[i].y -= 10;
         }
-        bullets[i].y -= 10;
     }
-    if(toRemove.length >= 1){
-        stage.removeChild(bullets[toRemove[0]]);
-        bullets.splice(toRemove[0],1);   
-    }
+//    if(toRemove.length >= 1){
+//    }
     if(health == 0){
         state = gameMode.GAMEOVER;
     }
@@ -456,6 +460,7 @@ function resetGameTimer() {
     frameCount = 0;
     score = 0;
 }
+
 
 function shoot(time){
     if(time > shootTime + .5){
@@ -468,8 +473,6 @@ function shoot(time){
         shootTime = time;
     }
     
-}
-
 function mouseInit() {
     stage.on("stagemousemove", function(evt) {
     mouseX = Math.floor(evt.stageX);
