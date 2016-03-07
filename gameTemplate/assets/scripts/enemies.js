@@ -8,7 +8,7 @@ function Enemy(xPos, yPos, health) {
     this.yPos = yPos;
     this.bullets = [];
     this.health = health;
-    this.direction = -1;
+    this.direction = 1;
     this.moveForward = false;
     this.movedSouthAmount = 0;
     this.shotDelay = 45;
@@ -53,25 +53,25 @@ Enemy.prototype.die = function() {
 };
 Enemy.prototype.move = function() {
     if(!this.moveForward) {
-        this.xPos += this.direction * 2;
-        this.rectangle.x += this.direction * 2;
-        if(this.rectangle.x < 25 || this.rectangle.x > 780) {
+        this.xPos += this.direction * 3;
+        this.rectangle.x += this.direction * 3;
+        if(this.rectangle.x < 10 || this.rectangle.x > 650) {
             this.direction *= -1;
             this.moveForward = true;
         }
     } else {
-        this.rectangle.y += 2;
-        this.yPos += 2;
-        this.movedSouthAmount += 2;
+        this.rectangle.y += 3;
+        this.yPos += 3;
+        this.movedSouthAmount += 3;
         if(this.yPos > 500) this.die();
-        if(this.movedSouthAmount === 40) {
+        if(this.movedSouthAmount > 40) {
             this.moveForward = false;
             this.movedSouthAmount = 0;
         }
     }
     this.shotTimer++;
     if(this.shotDelay <= this.shotTimer) {
-        if(Math.floor(Math.random() * 10 + 1) <= 1) {
+        if(Math.floor(Math.random() * 5 + 1) <= 1) {
             if(this.bullets.length < maxBullets) {
                 this.shotTimer = 0;
                 this.shoot();
@@ -92,9 +92,11 @@ Enemy.prototype.move = function() {
             bullets.splice(i,1);
             i--;
             this.takeDamage();
+            addScore(5);
             // if health goes below 0
             if(this.health === 0) {
                 this.die();
+                addScore(15);
                 break;
             }
         }
@@ -103,8 +105,8 @@ Enemy.prototype.move = function() {
 }
 Enemy.prototype.collisionDetection = function(bullet) {
     //check the bounds of the enemy with reference to the bullet
-    if(this.rectangle.x - 10 >= bullet.x + bullet.getBounds().width ||
-       this.rectangle.x + this.rectangle.getBounds().width - 10 <= bullet.x ||
+    if(this.rectangle.x - 12 >= bullet.x + bullet.getBounds().width ||
+       this.rectangle.x + this.rectangle.getBounds().width - 12 <= bullet.x ||
        this.rectangle.y - 5 >= bullet.y + bullet.getBounds().height ||
        this.rectangle.y + this.rectangle.getBounds().height <= bullet.y) return false;
     return true;
@@ -122,7 +124,7 @@ function moveAllEnemies() {
 }
 function createEnemy() {
     if(enemyList.length < maxEnemies && levelEnemiesLeft != 0) {
-        var enemy = new Enemy(770, 100, 2);
+        var enemy = new Enemy(11, 100, 2);
         levelEnemiesLeft--;
     }
 }
@@ -131,10 +133,20 @@ function drawEnemies() {
         enemyList[i].draw();
     }
 }
-function setupEnemies() {
+function setupEnemies(level) {
     enemyContainer = new createjs.Container();
     stage.addChild(enemyContainer);
+    maxEnemies = 8 + level;
+    levelEnemiesLeft = 8 + (level * 2);
+    maxBullets = (2 + level > 5) ? 5 : 2 + level;
 }
 function isLevelCleared() {
     return (enemyList.length === 0 && levelEnemiesLeft === 0);
+}
+function clearEnemies() {
+    for(var i = 0; i < enemyList.length; i++) {
+        enemyList[i].removeAllBullets();
+    }
+    enemyList = [];
+    enemyContainer.removeAllChildren();
 }

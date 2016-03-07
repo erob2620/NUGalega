@@ -39,7 +39,7 @@ var hud;
 var attackPower;
 var hitTime;
 var shootTime;
-
+var level = 1;
 manifest = [
     {src:"images/title.jpg", id:"title"},
     {src:"images/instruction.jpg", id:"instruction"},
@@ -94,7 +94,14 @@ function loadComplete(evt){
     playButton = new createjs.Bitmap(queue.getResult("playButton"));    
     playButton.x = 700;
     playButton.y = 540;  
-    playButton.on("click", function(evt){state = gameMode.PLAY;resetGameTimer(); health = 5;createHealth();});
+    playButton.on("click", function(evt){
+        main();
+        resetGameTimer(); 
+        health = 5;
+        createHealth();
+        state = gameMode.PLAY;
+
+    });
     instructionButton = new createjs.Bitmap(queue.getResult("instructionButton"));  
     instructionButton.x = 620;
     instructionButton.y = 540;
@@ -143,7 +150,7 @@ function loadComplete(evt){
     stage.addChild(shopScreen);
     stage.addChild(gameoverScreen);
     stage.addChild(playButton);
-    stage.addChild(shopButton);
+    //stage.addChild(shopButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
     titleScreen.visible = true;
@@ -164,7 +171,7 @@ function loadComplete(evt){
         });*/
     
     walk = new createjs.Shape();
-    walk.graphics.beginFill("#000").drawRect(0,0,20,20);
+    walk.graphics.beginFill("#000").drawRect(0,0,35,20);
     walk.x = 390;
     walk.y = 510;
     stage.addChild(walk);
@@ -222,12 +229,11 @@ function addScore(increment){
 }
 
 function damage(time){
-    if(time > hitTime + 1){
-        health--;
+    health--;
     stage.removeChild(healthNodes[0]);
     healthNodes.splice(0,1);
-    hitTime = time;
-    }
+    //hitTime = time;
+    
     console.log(healthNodes.length);
 }
 
@@ -237,7 +243,7 @@ function main() {
     writeCoordinates();
     writeScore();
     mouseInit();
-    setupEnemies();
+    setupEnemies(level);
     state = gameMode.TITLE;
     speed = 6;
     moving = false;
@@ -301,7 +307,8 @@ function showGame(){
     } 
     if(isLevelCleared()) {
         console.log('you cleared the level');
-        state = gameMode.SHOP;
+        clearScreen();
+        state = gameMode.GAMEOVER;
     }
     moveAllEnemies();
     runGameTimer();
@@ -432,7 +439,9 @@ function runGameTimer() {
     for(var i = 0; i < enemyList.length; i++){
         
         for(var j = 0; j < enemyList[i].bullets.length; j++){
-            if(enemyList[i].bullets[j].bulletShape.x > walk.x && enemyList[i].bullets[j].bulletShape.x < (walk.x + 20) && enemyList[i].bullets[j].bulletShape.y > walk.y && enemyList[i].bullets[j].bulletShape.y < (walk.y + 20)){
+            if(enemyList[i].bullets[j].bulletShape.x > walk.x && enemyList[i].bullets[j].bulletShape.x < (walk.x + 35) && enemyList[i].bullets[j].bulletShape.y > walk.y && enemyList[i].bullets[j].bulletShape.y < (walk.y + 20)){
+                enemyList[i].removeBullet(j);
+                j--;
                 damage(frameCount/(FPS));
             }
         }
@@ -451,6 +460,7 @@ function runGameTimer() {
 //    if(toRemove.length >= 1){
 //    }
     if(health == 0){
+        clearScreen();
         state = gameMode.GAMEOVER;
     }
 }
@@ -463,16 +473,19 @@ function resetGameTimer() {
 
 
 function shoot(time){
-    if(time > shootTime + .5){
+    if(time > shootTime + 1){
         var bullet = new createjs.Shape();
         bullet.graphics.beginFill("#000").drawRect(0,0,5,5);
-        bullet.x = walk.x + 7;
-        bullet.y = walk.y;
+        bullet.x = walk.x + 20;
+        bullet.y = walk.y + 5;
+        bullet.setBounds(bullet.x, bullet.y, 5, 5);
+        bullet.regX = bullet.getBounds().width/2;
+        bullet.regY = bullet.getBounds().height/2;
         stage.addChild(bullet);
         bullets.push(bullet); 
         shootTime = time;
     }
-    
+}
 function mouseInit() {
     stage.on("stagemousemove", function(evt) {
     mouseX = Math.floor(evt.stageX);
@@ -525,8 +538,11 @@ switch(evt.keyCode) {
         case KEYCODE_S:  down = false;return false;
         case KEYCODE_D:  right = false;return false;  
     }
-    
-       
-
-    
+}
+function clearScreen() {
+    clearEnemies();
+    for(var i = 0; i < bullets.length; i++) {
+        stage.removeChild(bullets[i]);
+    }
+    bullets = [];
 }
