@@ -37,6 +37,8 @@ var health;
 var healthNodes = [];
 var hud;
 var attackPower;
+var hitTime;
+var shootTime;
 
 manifest = [
     {src:"images/title.jpg", id:"title"},
@@ -92,7 +94,7 @@ function loadComplete(evt){
     playButton = new createjs.Bitmap(queue.getResult("playButton"));    
     playButton.x = 700;
     playButton.y = 540;  
-    playButton.on("click", function(evt){state = gameMode.PLAY;resetGameTimer();});
+    playButton.on("click", function(evt){state = gameMode.PLAY;resetGameTimer(); health = 5;createHealth();});
     instructionButton = new createjs.Bitmap(queue.getResult("instructionButton"));  
     instructionButton.x = 620;
     instructionButton.y = 540;
@@ -179,6 +181,9 @@ function loadComplete(evt){
     stage.addChild(regainHealthBtn);
     main();
     stage.addChild(hud);
+}
+
+function createHealth(){
     for(var i = 320; i < 420; i += 20){
         var healthBlock = new createjs.Shape();
         healthBlock.graphics.beginFill("#f00").drawRect(0,0,20,20);
@@ -216,10 +221,14 @@ function addScore(increment){
     score += increment
 }
 
-function damage(){
-    health--;
+function damage(time){
+    if(time > hitTime + 1){
+        health--;
     stage.removeChild(healthNodes[0]);
     healthNodes.splice(0,1);
+    hitTime = time;
+    }
+    console.log(healthNodes.length);
 }
 
 function main() {
@@ -235,8 +244,9 @@ function main() {
     shooting = false;
     createjs.Ticker.addEventListener("tick", loop);
     createjs.Ticker.setFPS(FPS);
-    health = 5;
     attackPower = 1;
+    hitTime = 0;
+    shootTime = 0;
 }
 
 function showTitle(){
@@ -264,11 +274,11 @@ function showTitle(){
 }
 var count = 0;
 function showGame(){
-    //runGameTimer();
+    runGameTimer();
     stage.removeChild(coordinates);
     writeCoordinates();
     playing = true;
-    walk.visible = false;
+    walk.visible = true;
     titleScreen.visible = false;
     gameoverScreen.visible = false;
     backgroundScreen.visible = true;
@@ -304,7 +314,6 @@ function showGameOver(){
     backgroundScreen.visible = false;
     instructionScreen.visible = false;
     shopScreen.visible = false;
-    timer.visible = false;
     coordinates.visible = false;
     playButton.visible = true;
     instructionButton.visible = true;
@@ -349,7 +358,6 @@ function showShop(){
     backgroundScreen.visible = false;
     shopScreen.visible = true;
     instructionScreen.visible = false;
-    timer.visible = false;
     coordinates.visible = false;
     playButton.visible = true;
     instructionButton.visible = false;
@@ -399,18 +407,15 @@ function runGameTimer() {
     frameCount += 1;
     if(frameCount%(FPS/10) === 0) {
         gameTimer = frameCount/(FPS);
-        if(gameTimer*10 % 1 === 0){
-            stage.removeChild(timer);
-            writeTimer();
-        }
-        if(gameTimer % 5 == 0){
-            damage();
-        }
+        
+        
     }
+    
         if(left && walk.x > 0){
+            
             walk.x -= speed;
         }
-        if(right && walk.x < 780){
+        if(right && walk.x < 680){
             walk.x += speed;
         }
         if(up && walk.y > 500){
@@ -420,7 +425,15 @@ function runGameTimer() {
             walk.y += speed;
         }
     if(shooting){
-        shoot();
+        shoot(frameCount/(FPS));
+    } 
+    for(var i = 0; i < enemyList.length; i++){
+        
+        for(var j = 0; j < enemyList[i].bullets.length; j++){
+            if(enemyList[i].bullets[j].bulletShape.x > walk.x && enemyList[i].bullets[j].bulletShape.x < (walk.x + 20) && enemyList[i].bullets[j].bulletShape.y > walk.y && enemyList[i].bullets[j].bulletShape.y < (walk.y + 20)){
+                damage(frameCount/(FPS));
+            }
+        }
     }
     var toRemove = [];
     for(var i = 0; i < bullets.length; i++){
@@ -444,13 +457,17 @@ function resetGameTimer() {
     score = 0;
 }
 
-function shoot(){
-    var bullet = new createjs.Shape();
-    bullet.graphics.beginFill("#000").drawRect(0,0,5,5);
-    bullet.x = walk.x + 7;
-    bullet.y = walk.y;
-    stage.addChild(bullet);
-    bullets.push(bullet);
+function shoot(time){
+    if(time > shootTime + .5){
+        var bullet = new createjs.Shape();
+        bullet.graphics.beginFill("#000").drawRect(0,0,5,5);
+        bullet.x = walk.x + 7;
+        bullet.y = walk.y;
+        stage.addChild(bullet);
+        bullets.push(bullet); 
+        shootTime = time;
+    }
+    
 }
 
 function mouseInit() {
