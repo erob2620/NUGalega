@@ -1,4 +1,4 @@
-var bulletSpeed = 5;
+var bulletSpeed = 6;
 
 function Bullet(xPos, yPos, isPlayerBullet) {
     this.xPos = xPos;

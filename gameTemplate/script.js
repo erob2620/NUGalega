@@ -42,6 +42,8 @@ var shootTime;
 var shootSpeed;
 var powerUp;
 
+var level = 1;
+
 manifest = [
     {src:"images/title.jpg", id:"title"},
     {src:"images/instruction.jpg", id:"instruction"},
@@ -96,7 +98,14 @@ function loadComplete(evt){
     playButton = new createjs.Bitmap(queue.getResult("playButton"));    
     playButton.x = 700;
     playButton.y = 540;  
-    playButton.on("click", function(evt){state = gameMode.PLAY;resetGameTimer(); health = 5;createHealth();});
+    playButton.on("click", function(evt){
+        main();
+        resetGameTimer(); 
+        health = 5;
+        createHealth();
+        state = gameMode.PLAY;
+        stage.addChild(powerUp);
+    });
     instructionButton = new createjs.Bitmap(queue.getResult("instructionButton"));  
     instructionButton.x = 620;
     instructionButton.y = 540;
@@ -145,7 +154,7 @@ function loadComplete(evt){
     stage.addChild(shopScreen);
     stage.addChild(gameoverScreen);
     stage.addChild(playButton);
-    stage.addChild(shopButton);
+    //stage.addChild(shopButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
     titleScreen.visible = true;
@@ -166,7 +175,7 @@ function loadComplete(evt){
         });*/
     
     walk = new createjs.Shape();
-    walk.graphics.beginFill("#000").drawRect(0,0,20,20);
+    walk.graphics.beginFill("#000").drawRect(0,0,35,20);
     walk.x = 390;
     walk.y = 510;
     stage.addChild(walk);
@@ -185,6 +194,7 @@ function loadComplete(evt){
     stage.addChild(upgradeSpeedBtn);
     stage.addChild(upgradeBulletSpeedBtn);
     stage.addChild(regainHealthBtn);
+    stage.addChild(powerUp);
     main();
     stage.addChild(hud);
 }
@@ -228,12 +238,11 @@ function addScore(increment){
 }
 
 function damage(time){
-    if(time > hitTime + 1){
-        health--;
+    health--;
     stage.removeChild(healthNodes[0]);
     healthNodes.splice(0,1);
-    hitTime = time;
-    }
+    //hitTime = time;
+    
     console.log(healthNodes.length);
 }
 
@@ -243,7 +252,7 @@ function main() {
     writeCoordinates();
     writeScore();
     mouseInit();
-    setupEnemies();
+    setupEnemies(level);
     state = gameMode.TITLE;
     speed = 6;
     moving = false;
@@ -278,6 +287,7 @@ function showTitle(){
         healthNodes[i].visible = false;
     }
     hud.visible = false;
+    powerUp.visible = false;
 }
 var count = 0;
 function showGame(){
@@ -308,13 +318,15 @@ function showGame(){
     } 
     if(isLevelCleared()) {
         console.log('you cleared the level');
-        state = gameMode.SHOP;
+        clearScreen();
+        state = gameMode.GAMEOVER;
     }
     moveAllEnemies();
     runGameTimer();
     for(var i = 0; i < healthNodes.length; i++){
         healthNodes[i].visible = true;
     }
+    powerUp.visible = true;
     hud.visible = true;
 }
 
@@ -339,6 +351,7 @@ function showGameOver(){
         healthNodes[i].visible = false;
     }
     hud.visible = false;
+    powerUp.visible = false;
 }
 
 function showInstructions(){
@@ -359,6 +372,7 @@ function showInstructions(){
         healthNodes[i].visible = false;
     }
     hud.visible = false;
+    powerUp.visible = false;
 }
 
 function showShop(){
@@ -433,9 +447,10 @@ function runGameTimer() {
         if(down && walk.y < 580){
             walk.y += speed;
         }
-        if(walk.x + 10 > powerUp.x && walk.x + 10 < powerUp.x + 20 && walk.y + 10 > powerUp.y && walk.y + 10 < powerUp.y + 20){
-            powerUp();
+        if(walk.x + 15 > powerUp.x && walk.x + 15 < powerUp.x + 20 && walk.y + 15 > powerUp.y && walk.y + 15 < powerUp.y + 20){
+            power_Up();
             console.log('powerup');
+            stage.removeChild(powerUp);
         }
     if(shooting){
         shoot(frameCount/(FPS));
@@ -443,7 +458,9 @@ function runGameTimer() {
     for(var i = 0; i < enemyList.length; i++){
         
         for(var j = 0; j < enemyList[i].bullets.length; j++){
-            if(enemyList[i].bullets[j].bulletShape.x > walk.x && enemyList[i].bullets[j].bulletShape.x < (walk.x + 20) && enemyList[i].bullets[j].bulletShape.y > walk.y && enemyList[i].bullets[j].bulletShape.y < (walk.y + 20)){
+            if(enemyList[i].bullets[j].bulletShape.x > walk.x && enemyList[i].bullets[j].bulletShape.x < (walk.x + 35) && enemyList[i].bullets[j].bulletShape.y > walk.y && enemyList[i].bullets[j].bulletShape.y < (walk.y + 20)){
+                enemyList[i].removeBullet(j);
+                j--;
                 damage(frameCount/(FPS));
             }
         }
@@ -462,6 +479,7 @@ function runGameTimer() {
 //    if(toRemove.length >= 1){
 //    }
     if(health == 0){
+        clearScreen();
         state = gameMode.GAMEOVER;
     }
 }
@@ -477,15 +495,18 @@ function shoot(time){
     if(time > shootTime + shootSpeed){
         var bullet = new createjs.Shape();
         bullet.graphics.beginFill("#000").drawRect(0,0,5,5);
-        bullet.x = walk.x + 7;
-        bullet.y = walk.y;
+        bullet.x = walk.x + 20;
+        bullet.y = walk.y + 5;
+        bullet.setBounds(bullet.x, bullet.y, 5, 5);
+        bullet.regX = bullet.getBounds().width/2;
+        bullet.regY = bullet.getBounds().height/2;
         stage.addChild(bullet);
         bullets.push(bullet); 
         shootTime = time;
     }
 }
     
-    function powerUp(){
+    function power_Up(){
         health = 10; 
         attackPower = 5;
         shootSpeed = .1;
@@ -543,8 +564,11 @@ switch(evt.keyCode) {
         case KEYCODE_S:  down = false;return false;
         case KEYCODE_D:  right = false;return false;  
     }
-    
-       
-
-    
+}
+function clearScreen() {
+    clearEnemies();
+    for(var i = 0; i < bullets.length; i++) {
+        stage.removeChild(bullets[i]);
+    }
+    bullets = [];
 }
