@@ -39,6 +39,8 @@ var hud;
 var attackPower;
 var hitTime;
 var shootTime;
+var shootSpeed;
+var powerUp;
 
 manifest = [
     {src:"images/title.jpg", id:"title"},
@@ -172,6 +174,10 @@ function loadComplete(evt){
     hud.graphics.beginFill("#aaa").drawRect(0,0,100,300);
     hud.x = 700;
     hud.y = 300;
+    powerUp = new createjs.Shape();
+    powerUp.graphics.beginFill("#55f").drawRect(0,0,20,20);
+    powerUp.x = 400;
+    powerUp.y = 550;
     stage.addChild(playButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
@@ -247,6 +253,7 @@ function main() {
     attackPower = 1;
     hitTime = 0;
     shootTime = 0;
+    shootSpeed = .5
 }
 
 function showTitle(){
@@ -426,6 +433,10 @@ function runGameTimer() {
         if(down && walk.y < 580){
             walk.y += speed;
         }
+        if(walk.x + 10 > powerUp.x && walk.x + 10 < powerUp.x + 20 && walk.y + 10 > powerUp.y && walk.y + 10 < powerUp.y + 20){
+            powerUp();
+            console.log('powerup');
+        }
     if(shooting){
         shoot(frameCount/(FPS));
     } 
@@ -463,7 +474,7 @@ function resetGameTimer() {
 
 
 function shoot(time){
-    if(time > shootTime + .5){
+    if(time > shootTime + shootSpeed){
         var bullet = new createjs.Shape();
         bullet.graphics.beginFill("#000").drawRect(0,0,5,5);
         bullet.x = walk.x + 7;
@@ -471,6 +482,13 @@ function shoot(time){
         stage.addChild(bullet);
         bullets.push(bullet); 
         shootTime = time;
+    }
+}
+    
+    function powerUp(){
+        health = 10; 
+        attackPower = 5;
+        shootSpeed = .1;
     }
     
 function mouseInit() {
