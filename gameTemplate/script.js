@@ -24,7 +24,7 @@ var scoreText;
 var playButton;
 var instructionButton;
 var menuButton;
-var shopButton;
+//var shopButton;
 var upgradeSpeedBtn, upgradeHealthBtn, upgradeBulletSpeedBtn, regainHealthBtn;
 var cacheVersion = new Date().getTime();
 var jsEnd = '.js?a=' + cacheVersion;
@@ -54,7 +54,8 @@ manifest = [
     {src:"images/instructionButton.jpg", id:"instructionButton"},
     {src:"images/playButton.jpg", id:"playButton"},
     {src:"images/menuButton.jpg", id:"menuButton"},
-    {src:"images/shopButton.jpg", id:"shopButton"},
+    //{src:"images/shopButton.jpg", id:"shopButton"},
+    {src:"images/nextLevelButton.jpg", id:"nextLevelButton"},
     {src:"images/upgradeHealthButton.jpg", id:"upgradeHealthBtn"},
     {src:"images/upgradeSpeedButton.jpg", id:"upgradeSpeedBtn"},
     {src:"images/bulletSpeedButton.jpg", id:"upgradeBulletSpeedBtn"},
@@ -118,11 +119,17 @@ function loadComplete(evt){
     menuButton.on("click",function(evt){
         state = gameMode.TITLE;
     });
-	shopButton = new createjs.Bitmap(queue.getResult("shopButton"));
-    shopButton.x = 40;
-    shopButton.y = 540;
-    shopButton.on("click",function(evt){
-        state = gameMode.SHOP;
+//	shopButton = new createjs.Bitmap(queue.getResult("shopButton"));
+//    shopButton.x = 40;
+//    shopButton.y = 540;
+//    shopButton.on("click",function(evt){
+//        state = gameMode.SHOP;
+//    });
+	nextLevelButton = new createjs.Bitmap(queue.getResult("nextLevelButton"));
+    nextLevelButton.x = 700;
+    nextLevelButton.y = 540; 
+    nextLevelButton.on("click",function(evt){
+        state = gameMode.PLAY;
     });
 	upgradeHealthBtn = new createjs.Bitmap(queue.getResult("upgradeHealthBtn"));  
     upgradeHealthBtn.x = 200;
@@ -155,6 +162,7 @@ function loadComplete(evt){
     stage.addChild(gameoverScreen);
     stage.addChild(playButton);
     //stage.addChild(shopButton);
+    stage.addChild(nextLevelButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
     titleScreen.visible = true;
@@ -246,6 +254,10 @@ function damage(time){
     console.log(healthNodes.length);
 }
 
+function nextLevelSetup() {
+	console.log("Preparing next level...");
+}
+
 function main() {
     resetGameTimer();
     createButtons(); 
@@ -277,7 +289,8 @@ function showTitle(){
     playButton.visible = true;
     instructionButton.visible = true;
     menuButton.visible = false;
-    shopButton.visible = false;
+    //shopButton.visible = false;
+    nextLevelButton.visible = false;
 	upgradeHealthBtn.visible = false;
 	upgradeSpeedBtn.visible = false;
 	upgradeBulletSpeedBtn.visible = false;
@@ -305,7 +318,8 @@ function showGame(){
     playButton.visible = false;
     instructionButton.visible = false;
     menuButton.visible = false;
-    shopButton.visible = true;
+    //shopButton.visible = true;
+    nextLevelButton.visible = false;
 	upgradeHealthBtn.visible = false;
 	upgradeSpeedBtn.visible = false;
 	upgradeBulletSpeedBtn.visible = false;
@@ -319,7 +333,8 @@ function showGame(){
     if(isLevelCleared()) {
         console.log('you cleared the level');
         clearScreen();
-        state = gameMode.GAMEOVER;
+		level += 1;
+        state = gameMode.SHOP;
     }
     moveAllEnemies();
     runGameTimer();
@@ -341,7 +356,8 @@ function showGameOver(){
     playButton.visible = true;
     instructionButton.visible = true;
     menuButton.visible = true;
-    shopButton.visible = true;
+    //shopButton.visible = false;
+	nextLevelButton.visible = false;
 	upgradeHealthBtn.visible = false;
 	upgradeSpeedBtn.visible = false;
 	upgradeBulletSpeedBtn.visible = false;
@@ -366,7 +382,8 @@ function showInstructions(){
     playButton.visible = true;
     instructionButton.visible = false;
     menuButton.visible = true;
-    shopButton.visible = false;
+    //shopButton.visible = false;
+	nextLevelButton.visible = false;
     scoreText.visible = false;
     for(var i = 0; i < healthNodes.length; i++){
         healthNodes[i].visible = false;
@@ -384,10 +401,11 @@ function showShop(){
     shopScreen.visible = true;
     instructionScreen.visible = false;
     coordinates.visible = false;
-    playButton.visible = true;
+    playButton.visible = false;
     instructionButton.visible = false;
     menuButton.visible = false;
-    shopButton.visible = false;
+    //shopButton.visible = false;
+	nextLevelButton.visible = true;
 	upgradeHealthBtn.visible = true;
 	upgradeSpeedBtn.visible = true;
 	upgradeBulletSpeedBtn.visible = true;
