@@ -3,6 +3,7 @@ var enemyContainer;
 var maxEnemies = 8;
 var levelEnemiesLeft = 10;
 var maxBullets = 2;
+var powerupCount = 0;
 function Enemy(xPos, yPos, health) {
     this.xPos = xPos;
     this.yPos = yPos;
@@ -95,6 +96,7 @@ Enemy.prototype.move = function() {
             addScore(5);
             // if health goes below 0
             if(this.health === 0) {
+                dropPowerup(this.xPos, this.yPos);
                 this.die();
                 addScore(15);
                 break;
@@ -111,6 +113,7 @@ Enemy.prototype.collisionDetection = function(bullet) {
        this.rectangle.y + this.rectangle.getBounds().height <= bullet.y) return false;
     return true;
 };
+
 Enemy.prototype.takeDamage = function() {
     this.health--;
 }
@@ -120,6 +123,16 @@ Enemy.prototype.draw = function() {
 function moveAllEnemies() {
     for(var i = 0; i < enemyList.length; i++) {
         enemyList[i].move();
+    }
+    if(!powerupAvailable) {
+        powerup.move();
+        if(powerup.isActive) {
+            powerupCount++;
+            if(powerupCount > FPS) {
+                powerup.countDown();
+                powerupCount = 0;
+            }
+        }
     }
 }
 function createEnemy() {
@@ -149,4 +162,13 @@ function clearEnemies() {
     }
     enemyList = [];
     enemyContainer.removeAllChildren();
+}
+var powerup;
+function dropPowerup(x, y) {
+    if(powerupAvailable) {
+        if(Math.floor(Math.random() * 3 + 1) <= 1) {
+            powerup = new Powerup(x, y, 'minigun');
+            powerupAvailable = false;
+        }
+    }
 }
