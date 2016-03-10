@@ -4,9 +4,13 @@ var maxEnemies = 8;
 var levelEnemiesLeft = 10;
 var maxBullets = 2;
 var powerupCount = 0;
-function Enemy(xPos, yPos, health) {
+var gameLevel = 1;
+function Enemy(xPos, yPos, health, bulletMoveX, bulletMoveY, multipleBullets) {
     this.xPos = xPos;
     this.yPos = yPos;
+    this.bulletMoveX = bulletMoveX;
+    this.bulletMoveY = bulletMoveY;
+    this.multipleBullets = multipleBullets;
     this.bullets = [];
     this.health = health;
     this.direction = 1;
@@ -29,12 +33,21 @@ Enemy.prototype.spawn = function() {
     this.draw();
 };
 Enemy.prototype.shoot = function() {
-    var bullet = new Bullet(this.xPos + 3, this.yPos + 11, false);
-    
-    //create bullet
-    // add bullet to bullet array
-    this.bullets.push(bullet);
-    bullet.add();
+    var bullet;
+    if(this.multipleBullets) {
+        bullet = new Bullet(this.xPos - 9, this.yPos + 11, false, this.bulletMoveX * -1, this.bulletMoveY);
+        var secondBullet = new Bullet(this.xPos + 9, this.yPos + 11, false, this.bulletMoveX, this.bulletMoveY);
+        this.bullets.push(bullet);
+        this.bullets.push(secondBullet);
+        bullet.add();
+        secondBullet.add();
+    } else {
+        bullet = new Bullet(this.xPos + 3, this.yPos + 11, false, this.bulletMoveX, this.bulletMoveY);
+        this.bullets.push(bullet);
+        bullet.add();
+    }
+
+
 };
 Enemy.prototype.removeBullet = function(bulletIndex) {
     //if bullet moved off screen or hit player remove it
@@ -81,7 +94,8 @@ Enemy.prototype.move = function() {
     } 
     for(var i = 0; i < this.bullets.length; i++) {
         this.bullets[i].move();
-        if(this.bullets[i].bulletShape.y > 575) {
+        if(this.bullets[i].bulletShape.y > 575 || this.bullets[i].bulletShape.x < 5 
+           || this.bullets[i].bulletShape.y > 755) {
             this.removeBullet(i);
             i--;
         }
@@ -137,7 +151,17 @@ function moveAllEnemies() {
 }
 function createEnemy() {
     if(enemyList.length < maxEnemies && levelEnemiesLeft != 0) {
-        var enemy = new Enemy(11, 100, 2);
+        switch(gameLevel) {
+            case 1:
+                var enemy = new Enemy(11, 100, 2, 0, 9, false);
+                break;
+            case 2:
+                var enemy = new Enemy(11, 100, 3, 0, 9, true);
+                break;
+            case 3:
+                var enemy = new Enemy(11, 100, 4, 4, 7, true);
+                break;
+        }
         levelEnemiesLeft--;
     }
 }
@@ -149,9 +173,10 @@ function drawEnemies() {
 function setupEnemies(level) {
     enemyContainer = new createjs.Container();
     stage.addChild(enemyContainer);
+    gameLevel = level;
     maxEnemies = 8 + level;
     levelEnemiesLeft = 8 + (level * 2);
-    maxBullets = (2 + level > 5) ? 5 : 2 + level;
+    maxBullets = (2 + level > 6) ? 6 : 2 + level;
 }
 function isLevelCleared() {
     return (enemyList.length === 0 && levelEnemiesLeft === 0);
