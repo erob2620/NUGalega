@@ -1,8 +1,10 @@
 var bulletSpeed = 6;
 
-function Bullet(xPos, yPos, isPlayerBullet) {
+function Bullet(xPos, yPos, isPlayerBullet, moveX, moveY) {
     this.xPos = xPos;
     this.yPos = yPos;
+    this.moveX = moveX;
+    this.moveY = moveY;
     this.playerBullet = isPlayerBullet;
     this.bulletShape = new createjs.Shape();
     this.bulletShape.graphics.beginFill('#000').drawRect(0, 0, 5, 10);
@@ -13,7 +15,8 @@ function Bullet(xPos, yPos, isPlayerBullet) {
     this.bulletShape.regY = this.bulletShape.getBounds().height/2;
 }
 Bullet.prototype.move = function() {
-    this.bulletShape.y = (this.playerBullet)? this.bulletShape.y - bulletSpeed : this.bulletShape.y + bulletSpeed;
+    this.bulletShape.y = (this.playerBullet)? this.bulletShape.y - this.moveY : this.bulletShape.y + this.moveY;
+    this.bulletShape.x += this.moveX;
 }
 Bullet.prototype.remove = function() {
     enemyContainer.removeChild(this.bulletShape);

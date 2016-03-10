@@ -3,9 +3,14 @@ var enemyContainer;
 var maxEnemies = 8;
 var levelEnemiesLeft = 10;
 var maxBullets = 2;
-function Enemy(xPos, yPos, health) {
+var powerupCount = 0;
+var gameLevel = 1;
+function Enemy(xPos, yPos, health, bulletMoveX, bulletMoveY, multipleBullets) {
     this.xPos = xPos;
     this.yPos = yPos;
+    this.bulletMoveX = bulletMoveX;
+    this.bulletMoveY = bulletMoveY;
+    this.multipleBullets = multipleBullets;
     this.bullets = [];
     this.health = health;
     this.direction = 1;
@@ -28,12 +33,21 @@ Enemy.prototype.spawn = function() {
     this.draw();
 };
 Enemy.prototype.shoot = function() {
-    var bullet = new Bullet(this.xPos + 3, this.yPos + 11, false);
-    
-    //create bullet
-    // add bullet to bullet array
-    this.bullets.push(bullet);
-    bullet.add();
+    var bullet;
+    if(this.multipleBullets) {
+        bullet = new Bullet(this.xPos - 9, this.yPos + 11, false, this.bulletMoveX * -1, this.bulletMoveY);
+        var secondBullet = new Bullet(this.xPos + 9, this.yPos + 11, false, this.bulletMoveX, this.bulletMoveY);
+        this.bullets.push(bullet);
+        this.bullets.push(secondBullet);
+        bullet.add();
+        secondBullet.add();
+    } else {
+        bullet = new Bullet(this.xPos + 3, this.yPos + 11, false, this.bulletMoveX, this.bulletMoveY);
+        this.bullets.push(bullet);
+        bullet.add();
+    }
+
+
 };
 Enemy.prototype.removeBullet = function(bulletIndex) {
     //if bullet moved off screen or hit player remove it
@@ -71,7 +85,7 @@ Enemy.prototype.move = function() {
     }
     this.shotTimer++;
     if(this.shotDelay <= this.shotTimer) {
-        if(Math.floor(Math.random() * 5 + 1) <= 1) {
+        if(Math.floor(Math.random() * 4 + 1) <= 1) {
             if(this.bullets.length < maxBullets) {
                 this.shotTimer = 0;
                 this.shoot();
@@ -80,7 +94,8 @@ Enemy.prototype.move = function() {
     } 
     for(var i = 0; i < this.bullets.length; i++) {
         this.bullets[i].move();
-        if(this.bullets[i].bulletShape.y > 575) {
+        if(this.bullets[i].bulletShape.y > 575 || this.bullets[i].bulletShape.x < 5 
+           || this.bullets[i].bulletShape.y > 755) {
             this.removeBullet(i);
             i--;
         }
@@ -95,6 +110,7 @@ Enemy.prototype.move = function() {
             addScore(5);
             // if health goes below 0
             if(this.health === 0) {
+                dropPowerup(this.xPos, this.yPos);
                 this.die();
                 addScore(15);
                 break;
@@ -111,6 +127,7 @@ Enemy.prototype.collisionDetection = function(bullet) {
        this.rectangle.y + this.rectangle.getBounds().height <= bullet.y) return false;
     return true;
 };
+
 Enemy.prototype.takeDamage = function() {
     this.health--;
 }
@@ -121,10 +138,39 @@ function moveAllEnemies() {
     for(var i = 0; i < enemyList.length; i++) {
         enemyList[i].move();
     }
+    if(!powerupAvailable) {
+        powerup.move();
+        if(powerup.isActive) {
+            powerupCount++;
+            if(powerupCount > FPS) {
+                powerup.countDown();
+                powerupCount = 0;
+            }
+        }
+    }
 }
 function createEnemy() {
     if(enemyList.length < maxEnemies && levelEnemiesLeft != 0) {
-        var enemy = new Enemy(11, 100, 2);
+        switch(gameLevel) {
+            case 1:
+                var enemy = new Enemy(11, 100, 2, 0, 8, false);
+                break;
+            case 2:
+                var enemy = new Enemy(11, 100, 3, 0, 8, true);
+                break;
+            case 3:
+                var enemy = new Enemy(11, 100, 4, 4, 6, true);
+                break;
+            case 4:
+                var random = Math.floor(Math.random() * 3);
+                if(random === 0) {
+                    var enemy = new Enemy(11, 100, 2, 0, 8, false);
+                } else if(random === 1) {
+                    var enemy = new Enemy(11, 100, 3, 0, 8, true);
+                } else {
+                    var enemy = new Enemy(11, 100, 4, 4, 6, true);
+                }
+        }
         levelEnemiesLeft--;
     }
 }
@@ -136,9 +182,10 @@ function drawEnemies() {
 function setupEnemies(level) {
     enemyContainer = new createjs.Container();
     stage.addChild(enemyContainer);
+    gameLevel = level;
     maxEnemies = 8 + level;
     levelEnemiesLeft = 8 + (level * 2);
-    maxBullets = (2 + level > 5) ? 5 : 2 + level;
+    maxBullets = (2 + level > 6) ? 6 : 2 + level;
 }
 function isLevelCleared() {
     return (enemyList.length === 0 && levelEnemiesLeft === 0);
@@ -149,4 +196,13 @@ function clearEnemies() {
     }
     enemyList = [];
     enemyContainer.removeAllChildren();
+}
+var powerup;
+function dropPowerup(x, y) {
+    if(powerupAvailable) {
+        if(Math.floor(Math.random() * 3 + 1) <= 1) {
+            powerup = new Powerup(x, y, 'minigun');
+            powerupAvailable = false;
+        }
+    }
 }
