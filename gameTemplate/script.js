@@ -596,6 +596,7 @@ function runGameTimer() {
         state = gameMode.GAMEOVER;
     }
 }
+}
 
 function resetGameTimer() {
     gameTimer = 0;
