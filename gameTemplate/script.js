@@ -8,7 +8,7 @@ var shopScreen;
 var gameoverScreen;
 var mouseX, mouseY;
 var playing;
-var sprites, walk;
+var sprites, ship;
 var mouseX, mouseY;
 var coordinates;
 var gameMode = {
@@ -41,16 +41,19 @@ var hitTime;
 var shootTime;
 var shootSpeed;
 var powerUp;
+var bulletOne;
+var bullets;
+var enemySheet;
 
 var level = 1;
 
 manifest = [
     {src:"images/title.jpg", id:"title"},
     {src:"images/instruction.jpg", id:"instruction"},
-    {src:"images/play.jpg", id:"play"},
+    {src:"images/space.png", id:"play"},
     {src:"images/shop.jpg", id:"shop"},
     {src:"images/gameover.jpg", id:"gameover"},
-    {src:"images/sprites.png", id:"mySprites"},
+    {src:"images/ship.png", id:"shipSprite"},
     {src:"images/instructionButton.jpg", id:"instructionButton"},
     {src:"images/playButton.jpg", id:"playButton"},
     {src:"images/menuButton.jpg", id:"menuButton"},
@@ -64,6 +67,8 @@ manifest = [
     {src:"music/music.mp3", id:"music"},
     {src: 'scripts/enemies' + jsEnd},
     {src: 'scripts/bullet' + jsEnd},
+    {src: 'images/bullet.png', id:'bullet'},
+    {src:'images/enemies.png', id:'enemySprites'},
     {src: 'scripts/powerup' + jsEnd}
 ];
 
@@ -183,29 +188,46 @@ function loadComplete(evt){
     gameoverScreen.visible = false;
     winScreen.visible = false;
     
-     /*var walkSheet = new createjs.SpriteSheet({
-        images: [queue.getResult("mySprites")],
-        frames: [[160,0,19,49,0,10.05,48.6],[179,0,34,44,0,17.05,43.6],[213,0,22,46,0,9.05,45.6],[235,0,17,49,0,8.05,48.6],[0,49,25,49,0,10.05,48.6],[25,49,31,46,0,14.05,45.6],[56,49,33,44,0,16.05,43.6],[89,49,30,44,0,17.05,43.6],[119,49,28,46,0,17.05,45.6],[147,49,19,49,0,10.05,48.6],[166,49,23,49,0,14.05,48.6],[189,49,31,46,0,16.05,45.6],[220,49,34,44,0,17.05,43.6],[0,98,19,49,0,9.05,48.6],[19,98,34,44,0,17.05,43.6],[53,98,22,46,0,13.05,45.6],[75,98,17,49,0,9.05,48.6],[92,98,25,49,0,15.05,48.6],[117,98,31,46,0,17.05,45.6],[148,98,33,44,0,17.05,43.6],[181,98,30,44,0,13.05,43.6],[211,98,28,46,0,11.05,45.6],[0,147,19,49,0,9.05,48.6],[19,147,23,49,0,9.05,48.6],[42,147,31,46,0,15.05,45.6],[73,147,34,44,0,17.05,43.6]],
+     var shipSheet = new createjs.SpriteSheet({
+        images: [queue.getResult("shipSprite")],
+        frames: [[0,0,37,11,0,18.1,5.6],[37,0,37,12,0,18.1,5.6],[74,0,36,14,0,18.1,6.6],[0,14,36,16,0,18.1,7.6],[36,14,36,17,0,19.1,7.6],[72,14,36,19,0,19.1,8.6],[0,33,36,19,0,19.1,8.6],[0,0,37,11,0,18.1,5.6],[36,33,37,12,0,18.1,5.6],[73,33,37,14,0,18.1,6.6],[0,52,36,16,0,17.1,7.6],[36,52,36,17,0,17.1,7.6],[72,52,35,19,0,16.1,8.6],[72,52,35,19,0,16.1,8.6]],
         animations: {
-            standRight: [0, 0, "standRight"],
-            walkRight: [1, 12, "walkRight", .5],
-            standLeft: [13, 13, "standLeft"],
-            walkLeft: [14, 25, "walkLeft", .5]
+            stand: [0, 0, "stand"],
+            shipRight: [6, 6, "shipRight", .5],
+            shipLeft: [13, 13, "shipLeft", .5]
             }     
-        });*/
+        });
+    var bullets = new createjs.SpriteSheet({
+        images: [queue.getResult("bullet")],
+        frames:[[0,0,1,1,0,0.04999999999999982,0.04999999999999982],[1,0,2,2,0,1.0499999999999998,1.0499999999999998],[1,0,2,2,0,1.0499999999999998,1.0499999999999998],[3,0,5,5,0,2.05,2.05],[8,0,3,3,0,1.0499999999999998,1.0499999999999998],[1,0,2,2,0,1.0499999999999998,1.0499999999999998],[1,0,2,2,0,0.04999999999999982,0.04999999999999982]],
+        animations: {pulse: [0,6,.25]}
+    });
     
-    walk = new createjs.Shape();
-    walk.graphics.beginFill("#000").drawRect(0,0,35,20);
-    walk.x = 390;
-    walk.y = 510;
-    walk.setBounds(walk.x, walk.y, 35, 20);
-    walk.regX = walk.getBounds().width/2;
-    walk.regY = walk.getBounds().height/2;
-    stage.addChild(walk);
+    enemySheet = new createjs.SpriteSheet({
+        images: [queu.getResult("enemySprites")],
+        frames: [[0,0,35,22,0,17.85,9.1],[35,0,35,22,0,17.85,9.1],[70,0,35,22,0,17.85,9.1],[0,22,35,22,0,17.85,9.1],[35,22,35,22,0,17.85,9.1],[70,22,35,22,0,17.85,9.1],[0,44,35,22,0,17.85,9.1],[35,0,35,22,0,17.85,9.1],[0,0,35,22,0,17.85,9.1],[35,44,35,24,0,17.85,9.1],[70,44,35,24,0,17.85,9.1],[0,68,35,24,0,17.85,9.1],[35,68,35,24,0,17.85,9.1],[70,68,35,24,0,17.85,9.1],[35,68,35,24,0,17.85,9.1],[0,68,35,24,0,17.85,9.1],[70,44,35,24,0,17.85,9.1],[35,44,35,24,0,17.85,9.1],[0,92,35,22,0,17.85,9.1],[35,92,35,22,0,17.85,9.1],[35,92,35,22,0,17.85,9.1],[70,92,35,22,0,17.85,9.1],[0,114,35,22,0,17.85,9.1],[35,114,35,22,0,17.85,9.1],[70,114,35,22,0,17.85,9.1],[35,114,35,22,0,17.85,9.1],[0,114,35,22,0,17.85,9.1],[70,92,35,22,0,17.85,9.1],[35,92,35,22,0,17.85,9.1],[0,136,35,22,0,17.85,9.1]],
+        animation: {
+            typeOne: [0,6,.5],
+            typeTwo: [7,11,.5],
+            typeThree: [12,18,.5]
+        }
+    });
+    ship = new createjs.Sprite(shipSheet);
+    ship.x = 390;
+    ship.y = 510;
+    stage.addChild(ship);
+    ship.setBounds(walk.x, walk.y, 35, 20);
+    ship.regX = walk.getBounds().width/2;
+    ship.regY = walk.getBounds().height/2;
     hud = new createjs.Shape();
     hud.graphics.beginFill("#aaa").drawRect(0,0,100,300);
     hud.x = 700;
     hud.y = 300;
+    powerUp = new createjs.Shape();
+    powerUp.graphics.beginFill("#55f").drawRect(0,0,20,20);
+    powerUp.x = 400;
+    powerUp.y = 550;
+    bulletOne = new createjs.Sprite(bullets);
 //    powerUp = new createjs.Shape();
 //    powerUp.graphics.beginFill("#55f").drawRect(0,0,20,20);
 //    powerUp.x = 400;
@@ -294,7 +316,7 @@ function main() {
 
 function showTitle(){
     playing = false;
-    walk.visible = false;
+    ship.visible = false;
     titleScreen.visible = true;
     gameoverScreen.visible = false;
     backgroundScreen.visible = false;
@@ -352,9 +374,8 @@ function showGame(){
     stage.removeChild(coordinates);
     writeCoordinates();
     playing = true;
-    walk.visible = true;
+    ship.visible = true;
     winScreen.visible = false;
-
     titleScreen.visible = false;
     gameoverScreen.visible = false;
     backgroundScreen.visible = true;
@@ -398,7 +419,7 @@ function showGame(){
 
 function showGameOver(){
     playing = false;
-    walk.visible = false;
+    ship.visible = false;
     titleScreen.visible = false;
     gameoverScreen.visible = true;
     backgroundScreen.visible = false;
@@ -425,7 +446,7 @@ function showGameOver(){
 
 function showInstructions(){
     playing = false;
-    walk.visible = false;
+    ship.visible = false;
     titleScreen.visible = false;
     gameoverScreen.visible = false;
     backgroundScreen.visible = false;
@@ -449,8 +470,8 @@ function showInstructions(){
 
 function showShop(){
     playing = false;
+    ship.visible = false;
     winScreen.visible = false;
-    walk.visible = false;
     titleScreen.visible = false;
     gameoverScreen.visible = false;
     backgroundScreen.visible = false;
@@ -511,18 +532,27 @@ function runGameTimer() {
         gameTimer = frameCount/(FPS);
     }
     
-        if(left && walk.x > 0){
-            
-            walk.x -= speed;
+        if(left && ship.x > 0){
+            ship.gotoAndPlay("shipLeft");
+            ship.x -= speed;
         }
-        if(right && walk.x < 680){
-            walk.x += speed;
+        else if(right && ship.x < 680){
+            ship.x += speed;
+            ship.gotoAndPlay("shipRight");
         }
-        if(up && walk.y > 500){
-            walk.y -= speed;
+        else if(up && ship.y > 500){
+            ship.y -= speed;
         }
-        if(down && walk.y < 580){
-            walk.y += speed;
+        else if(down && ship.y < 580){
+            ship.y += speed;
+        }
+    else{
+        ship.gotoAndPlay("stand");
+    }
+        if(ship.x + 15 > powerUp.x && ship.x + 15 < powerUp.x + 20 && ship.y + 15 > powerUp.y && ship.y + 15 < powerUp.y + 20){
+            power_Up();
+            console.log('powerup');
+            stage.removeChild(powerUp);
         }
 //        if(walk.x + 15 > powerUp.x && walk.x + 15 < powerUp.x + 20 && walk.y + 15 > powerUp.y && walk.y + 15 < powerUp.y + 20){
 //            power_Up();
@@ -535,6 +565,7 @@ function runGameTimer() {
     for(var i = 0; i < enemyList.length; i++){
         
         for(var j = 0; j < enemyList[i].bullets.length; j++){
+            if(enemyList[i].bullets[j].bulletShape.x > ship.x && enemyList[i].bullets[j].bulletShape.x < (ship.x + 35) && enemyList[i].bullets[j].bulletShape.y > ship.y && enemyList[i].bullets[j].bulletShape.y < (ship.y + 20)){
             var bullet = enemyList[i].bullets[j].bulletShape;                
             if(walk.x - 12 >= bullet.x + bullet.getBounds().width ||
                 walk.x + walk.getBounds().width - 12 <= bullet.x ||
@@ -565,6 +596,7 @@ function runGameTimer() {
         state = gameMode.GAMEOVER;
     }
 }
+}
 
 function resetGameTimer() {
     gameTimer = 0;
@@ -575,11 +607,11 @@ function resetGameTimer() {
 
 function shoot(time){
     if(time > shootTime + shootSpeed){
-        var bullet = new createjs.Shape();
-        bullet.graphics.beginFill("#000").drawRect(0,0,5,5);
-        bullet.x = walk.x;
-        bullet.y = walk.y + 5;
+        var bullet = bulletOne.clone();
+        bullet.x = ship.x + 20;
+        bullet.y = ship.y + 5;
         bullet.setBounds(bullet.x, bullet.y, 5, 5);
+        bullet.gotoAndPlay("pulse");
         bullet.regX = bullet.getBounds().width/2;
         bullet.regY = bullet.getBounds().height/2;
         stage.addChild(bullet);
