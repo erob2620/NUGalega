@@ -85,7 +85,7 @@ Enemy.prototype.move = function() {
     }
     this.shotTimer++;
     if(this.shotDelay <= this.shotTimer) {
-        if(Math.floor(Math.random() * 5 + 1) <= 1) {
+        if(Math.floor(Math.random() * 4 + 1) <= 1) {
             if(this.bullets.length < maxBullets) {
                 this.shotTimer = 0;
                 this.shoot();
@@ -153,14 +153,23 @@ function createEnemy() {
     if(enemyList.length < maxEnemies && levelEnemiesLeft != 0) {
         switch(gameLevel) {
             case 1:
-                var enemy = new Enemy(11, 100, 2, 0, 9, false);
+                var enemy = new Enemy(11, 100, 2, 0, 8, false);
                 break;
             case 2:
-                var enemy = new Enemy(11, 100, 3, 0, 9, true);
+                var enemy = new Enemy(11, 100, 3, 0, 8, true);
                 break;
             case 3:
-                var enemy = new Enemy(11, 100, 4, 4, 7, true);
+                var enemy = new Enemy(11, 100, 4, 4, 6, true);
                 break;
+            case 4:
+                var random = Math.floor(Math.random() * 3);
+                if(random === 0) {
+                    var enemy = new Enemy(11, 100, 2, 0, 8, false);
+                } else if(random === 1) {
+                    var enemy = new Enemy(11, 100, 3, 0, 8, true);
+                } else {
+                    var enemy = new Enemy(11, 100, 4, 4, 6, true);
+                }
         }
         levelEnemiesLeft--;
     }

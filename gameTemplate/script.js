@@ -379,7 +379,7 @@ function showGame(){
     if(isLevelCleared()) {
         console.log('you cleared the level');
         clearScreen();
-        if(level === 3) {
+        if(level === 4) {
             state = gameMode.WIN;
         } else {
             level += 1;
