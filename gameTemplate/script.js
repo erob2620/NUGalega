@@ -103,8 +103,8 @@ function loadComplete(evt){
     playButton.x = 700;
     playButton.y = 540;  
     playButton.on("click", function(evt){
+       level = 1;
         main();
-        level = 1;
         resetGameTimer(); 
         health = 5;
         createHealth();

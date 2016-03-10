@@ -77,7 +77,10 @@ Enemy.prototype.move = function() {
         this.rectangle.y += 3;
         this.yPos += 3;
         this.movedSouthAmount += 3;
-        if(this.yPos > 500) this.die();
+        if(this.yPos > 430)  {
+            this.die();
+            levelEnemiesLeft++;
+        }
         if(this.movedSouthAmount > 40) {
             this.moveForward = false;
             this.movedSouthAmount = 0;
@@ -95,7 +98,7 @@ Enemy.prototype.move = function() {
     for(var i = 0; i < this.bullets.length; i++) {
         this.bullets[i].move();
         if(this.bullets[i].bulletShape.y > 575 || this.bullets[i].bulletShape.x < 5 
-           || this.bullets[i].bulletShape.y > 755) {
+           || this.bullets[i].bulletShape.y > 700) {
             this.removeBullet(i);
             i--;
         }
@@ -153,22 +156,22 @@ function createEnemy() {
     if(enemyList.length < maxEnemies && levelEnemiesLeft != 0) {
         switch(gameLevel) {
             case 1:
-                var enemy = new Enemy(11, 100, 2, 0, 8, false);
+                var enemy = new Enemy(11, 150, 2, 0, 8, false);
                 break;
             case 2:
-                var enemy = new Enemy(11, 100, 3, 0, 8, true);
+                var enemy = new Enemy(11, 150, 3, 0, 8, true);
                 break;
             case 3:
-                var enemy = new Enemy(11, 100, 4, 4, 6, true);
+                var enemy = new Enemy(11, 150, 4, 4, 6, true);
                 break;
             case 4:
                 var random = Math.floor(Math.random() * 3);
                 if(random === 0) {
-                    var enemy = new Enemy(11, 100, 2, 0, 8, false);
+                    var enemy = new Enemy(11, 150, 4, 0, 8, false);
                 } else if(random === 1) {
-                    var enemy = new Enemy(11, 100, 3, 0, 8, true);
+                    var enemy = new Enemy(11, 150, 4, 0, 8, true);
                 } else {
-                    var enemy = new Enemy(11, 100, 4, 4, 6, true);
+                    var enemy = new Enemy(11, 150, 4, 4, 6, true);
                 }
         }
         levelEnemiesLeft--;
@@ -200,7 +203,7 @@ function clearEnemies() {
 var powerup;
 function dropPowerup(x, y) {
     if(powerupAvailable) {
-        if(Math.floor(Math.random() * 3 + 1) <= 1) {
+        if(Math.floor(Math.random() * 4 + 1) <= 1) {
             powerup = new Powerup(x, y, 'minigun');
             powerupAvailable = false;
         }
