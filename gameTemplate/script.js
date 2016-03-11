@@ -44,7 +44,7 @@ var powerUp;
 var bulletOne;
 var bullets;
 var enemySheet;
-
+var enemySprite;
 var level = 1;
 
 manifest = [
@@ -206,10 +206,10 @@ function loadComplete(evt){
     enemySheet = new createjs.SpriteSheet({
         images: [queue.getResult("enemySprites")],
         frames: [[0,0,35,22,0,17.85,9.1],[35,0,35,22,0,17.85,9.1],[70,0,35,22,0,17.85,9.1],[0,22,35,22,0,17.85,9.1],[35,22,35,22,0,17.85,9.1],[70,22,35,22,0,17.85,9.1],[0,44,35,22,0,17.85,9.1],[35,0,35,22,0,17.85,9.1],[0,0,35,22,0,17.85,9.1],[35,44,35,24,0,17.85,9.1],[70,44,35,24,0,17.85,9.1],[0,68,35,24,0,17.85,9.1],[35,68,35,24,0,17.85,9.1],[70,68,35,24,0,17.85,9.1],[35,68,35,24,0,17.85,9.1],[0,68,35,24,0,17.85,9.1],[70,44,35,24,0,17.85,9.1],[35,44,35,24,0,17.85,9.1],[0,92,35,22,0,17.85,9.1],[35,92,35,22,0,17.85,9.1],[35,92,35,22,0,17.85,9.1],[70,92,35,22,0,17.85,9.1],[0,114,35,22,0,17.85,9.1],[35,114,35,22,0,17.85,9.1],[70,114,35,22,0,17.85,9.1],[35,114,35,22,0,17.85,9.1],[0,114,35,22,0,17.85,9.1],[70,92,35,22,0,17.85,9.1],[35,92,35,22,0,17.85,9.1],[0,136,35,22,0,17.85,9.1]],
-        animation: {
-            typeOne: [0,6,.5],
-            typeTwo: [7,11,.5],
-            typeThree: [12,18,.5]
+        animations: {
+            typeOne: [0,6, 'typeOne', .5],
+            typeTwo: [7,11, 'typeTwo', .5],
+            typeThree: [12,18, 'typeThree', .5]
         }
     });
     ship = new createjs.Sprite(shipSheet);
@@ -224,7 +224,7 @@ function loadComplete(evt){
     hud.x = 700;
     hud.y = 300;
     bulletOne = new createjs.Sprite(bullets);
-
+    enemySprite = new createjs.Sprite(enemySheet);
     stage.addChild(playButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
