@@ -48,14 +48,14 @@ Powerup.prototype.countDown = function() {
     }
 }
 Powerup.prototype.collisionDetection = function() {
-    if(this.rectangle.x - 5 >= walk.x + walk.getBounds().width ||
-       this.rectangle.x + this.rectangle.getBounds().width - 5 <= walk.x ||
-       this.rectangle.y - 5 >= walk.y + walk.getBounds().height ||
-       this.rectangle.y + this.rectangle.getBounds().height <= walk.y) return false;
+    if(this.rectangle.x - 5 >= ship.x + ship.getBounds().width - 35 ||
+       this.rectangle.x + this.rectangle.getBounds().width - 5 <= ship.x - 35 ||
+       this.rectangle.y - 5 >= ship.y + ship.getBounds().height ||
+       this.rectangle.y + this.rectangle.getBounds().height <= ship.y) return false;
     return true;
 }
 function clearPowerup() {
-    if(powerup.rectangle.x != -50) {
+    if(powerup != undefined && powerup.rectangle.x != -50) {
         stage.removeChild(powerup.rectangle);
     }
 }

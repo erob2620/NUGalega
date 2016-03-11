@@ -7,7 +7,7 @@ function Bullet(xPos, yPos, isPlayerBullet, moveX, moveY) {
     this.moveY = moveY;
     this.playerBullet = isPlayerBullet;
     this.bulletShape = new createjs.Shape();
-    this.bulletShape.graphics.beginFill('#000').drawRect(0, 0, 5, 10);
+    this.bulletShape.graphics.beginFill('#fff').drawRect(0, 0, 5, 10);
     this.bulletShape.x = this.xPos;
     this.bulletShape.y = this.yPos;
     this.bulletShape.setBounds(this.bulletShape.x, this.bulletShape.y, 5, 10);
