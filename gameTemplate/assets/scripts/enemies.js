@@ -5,7 +5,7 @@ var levelEnemiesLeft = 10;
 var maxBullets = 2;
 var powerupCount = 0;
 var gameLevel = 1;
-function Enemy(xPos, yPos, health, bulletMoveX, bulletMoveY, multipleBullets) {
+function Enemy(xPos, yPos, health, bulletMoveX, bulletMoveY, multipleBullets, sprite) {
     this.xPos = xPos;
     this.yPos = yPos;
     this.bulletMoveX = bulletMoveX;
@@ -18,13 +18,19 @@ function Enemy(xPos, yPos, health, bulletMoveX, bulletMoveY, multipleBullets) {
     this.movedSouthAmount = 0;
     this.shotDelay = 45;
     this.shotTimer = 0;
-    this.rectangle = new createjs.Shape();
-    this.rectangle.graphics.beginFill('#666').drawRect(0, 0, 35, 20);
-    this.rectangle.x = this.xPos;
-    this.rectangle.y = this.yPos;
-    this.rectangle.setBounds(this.xPos, this.yPos, 35, 20);
-    this.rectangle.regX = this.rectangle.getBounds().width/2;
-    this.rectangle.regY = this.rectangle.getBounds().height/2;
+    enemySprite.x = xPos;
+    enemySprite.y = yPos;
+    
+    console.log(enemySprite);
+    enemySprite.gotoAndPlay(sprite);
+    this.rectangle = enemySprite.clone();
+//    this.rectangle = new createjs.Shape();
+//    this.rectangle.graphics.beginFill('#666').drawRect(0, 0, 35, 20);
+//    this.rectangle.x = this.xPos;
+//    this.rectangle.y = this.yPos;
+//    this.rectangle.setBounds(this.xPos, this.yPos, 35, 20);
+//    this.rectangle.regX = this.rectangle.getBounds().width/2;
+//    this.rectangle.regY = this.rectangle.getBounds().height/2;
     this.spawn();
 }
 Enemy.prototype.spawn = function() {
@@ -77,7 +83,10 @@ Enemy.prototype.move = function() {
         this.rectangle.y += 3;
         this.yPos += 3;
         this.movedSouthAmount += 3;
-        if(this.yPos > 500) this.die();
+        if(this.yPos > 430)  {
+            this.die();
+            levelEnemiesLeft++;
+        }
         if(this.movedSouthAmount > 40) {
             this.moveForward = false;
             this.movedSouthAmount = 0;
@@ -95,7 +104,7 @@ Enemy.prototype.move = function() {
     for(var i = 0; i < this.bullets.length; i++) {
         this.bullets[i].move();
         if(this.bullets[i].bulletShape.y > 575 || this.bullets[i].bulletShape.x < 5 
-           || this.bullets[i].bulletShape.y > 755) {
+           || this.bullets[i].bulletShape.y > 700) {
             this.removeBullet(i);
             i--;
         }
@@ -153,22 +162,22 @@ function createEnemy() {
     if(enemyList.length < maxEnemies && levelEnemiesLeft != 0) {
         switch(gameLevel) {
             case 1:
-                var enemy = new Enemy(11, 100, 2, 0, 8, false);
+                var enemy = new Enemy(11, 150, 2, 0, 8, false, 'typeOne');
                 break;
             case 2:
-                var enemy = new Enemy(11, 100, 3, 0, 8, true);
+                var enemy = new Enemy(11, 150, 3, 0, 8, true, 'typeTwo');
                 break;
             case 3:
-                var enemy = new Enemy(11, 100, 4, 4, 6, true);
+                var enemy = new Enemy(11, 150, 4, 4, 6, true, 'typeThree');
                 break;
             case 4:
                 var random = Math.floor(Math.random() * 3);
                 if(random === 0) {
-                    var enemy = new Enemy(11, 100, 2, 0, 8, false);
+                    var enemy = new Enemy(11, 150, 4, 0, 8, false, 'typeOne');
                 } else if(random === 1) {
-                    var enemy = new Enemy(11, 100, 3, 0, 8, true);
+                    var enemy = new Enemy(11, 150, 4, 0, 8, true, 'typeTwo');
                 } else {
-                    var enemy = new Enemy(11, 100, 4, 4, 6, true);
+                    var enemy = new Enemy(11, 150, 4, 4, 6, true, 'typeThree');
                 }
         }
         levelEnemiesLeft--;
@@ -200,7 +209,7 @@ function clearEnemies() {
 var powerup;
 function dropPowerup(x, y) {
     if(powerupAvailable) {
-        if(Math.floor(Math.random() * 3 + 1) <= 1) {
+        if(Math.floor(Math.random() * 4 + 1) <= 1) {
             powerup = new Powerup(x, y, 'minigun');
             powerupAvailable = false;
         }

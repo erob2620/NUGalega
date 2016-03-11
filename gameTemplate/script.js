@@ -45,7 +45,7 @@ var bulletOne;
 var bullets;
 var enemySheet;
 var bossSheet;
-
+var enemySprite;
 var level = 1;
 
 manifest = [
@@ -110,8 +110,8 @@ function loadComplete(evt){
     playButton.x = 700;
     playButton.y = 540;  
     playButton.on("click", function(evt){
+       level = 1;
         main();
-        level = 1;
         resetGameTimer(); 
         health = 5;
         createHealth();
@@ -212,10 +212,10 @@ function loadComplete(evt){
     enemySheet = new createjs.SpriteSheet({
         images: [queue.getResult("enemySprites")],
         frames: [[0,0,35,22,0,17.85,9.1],[35,0,35,22,0,17.85,9.1],[70,0,35,22,0,17.85,9.1],[0,22,35,22,0,17.85,9.1],[35,22,35,22,0,17.85,9.1],[70,22,35,22,0,17.85,9.1],[0,44,35,22,0,17.85,9.1],[35,0,35,22,0,17.85,9.1],[0,0,35,22,0,17.85,9.1],[35,44,35,24,0,17.85,9.1],[70,44,35,24,0,17.85,9.1],[0,68,35,24,0,17.85,9.1],[35,68,35,24,0,17.85,9.1],[70,68,35,24,0,17.85,9.1],[35,68,35,24,0,17.85,9.1],[0,68,35,24,0,17.85,9.1],[70,44,35,24,0,17.85,9.1],[35,44,35,24,0,17.85,9.1],[0,92,35,22,0,17.85,9.1],[35,92,35,22,0,17.85,9.1],[35,92,35,22,0,17.85,9.1],[70,92,35,22,0,17.85,9.1],[0,114,35,22,0,17.85,9.1],[35,114,35,22,0,17.85,9.1],[70,114,35,22,0,17.85,9.1],[35,114,35,22,0,17.85,9.1],[0,114,35,22,0,17.85,9.1],[70,92,35,22,0,17.85,9.1],[35,92,35,22,0,17.85,9.1],[0,136,35,22,0,17.85,9.1]],
-        animation: {
-            typeOne: [0,6,.5],
-            typeTwo: [7,11,.5],
-            typeThree: [12,18,.5]
+        animations: {
+            typeOne: [0,6, 'typeOne', .5],
+            typeTwo: [7,11, 'typeTwo', .5],
+            typeThree: [12,18, 'typeThree', .5]
         }
     });
     ship = new createjs.Sprite(shipSheet);
@@ -229,15 +229,8 @@ function loadComplete(evt){
     hud.graphics.beginFill("#aaa").drawRect(0,0,100,300);
     hud.x = 700;
     hud.y = 300;
-    powerUp = new createjs.Shape();
-    powerUp.graphics.beginFill("#55f").drawRect(0,0,20,20);
-    powerUp.x = 400;
-    powerUp.y = 550;
     bulletOne = new createjs.Sprite(bullets);
-//    powerUp = new createjs.Shape();
-//    powerUp.graphics.beginFill("#55f").drawRect(0,0,20,20);
-//    powerUp.x = 400;
-//    powerUp.y = 550;
+    enemySprite = new createjs.Sprite(enemySheet);
     stage.addChild(playButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
@@ -245,7 +238,6 @@ function loadComplete(evt){
     stage.addChild(upgradeSpeedBtn);
     stage.addChild(upgradeBulletSpeedBtn);
     stage.addChild(regainHealthBtn);
-//    stage.addChild(powerUp);
     main();
     stage.addChild(hud);
 }
@@ -538,20 +530,20 @@ function runGameTimer() {
         gameTimer = frameCount/(FPS);
     }
     
-        if(left && ship.x > 0){
-            ship.gotoAndPlay("shipLeft");
-            ship.x -= speed;
-        }
-        else if(right && ship.x < 680){
-            ship.x += speed;
-            ship.gotoAndPlay("shipRight");
-        }
-        else if(up && ship.y > 500){
-            ship.y -= speed;
-        }
-        else if(down && ship.y < 580){
-            ship.y += speed;
-        }
+    if(left && ship.x > 0){
+        ship.gotoAndPlay("shipLeft");
+        ship.x -= speed;
+    }
+    else if(right && ship.x < 680){
+        ship.x += speed;
+        ship.gotoAndPlay("shipRight");
+    }
+    else if(up && ship.y > 500){
+        ship.y -= speed;
+    }
+    else if(down && ship.y < 580){
+        ship.y += speed;
+    }
     else{
         ship.gotoAndPlay("stand");
     }
@@ -565,16 +557,16 @@ function runGameTimer() {
 //            console.log('powerup');
 //            stage.removeChild(powerUp);
 //        }
+
     if(shooting){
         shoot(frameCount/(FPS));
     } 
     for(var i = 0; i < enemyList.length; i++){
         
         for(var j = 0; j < enemyList[i].bullets.length; j++){
-            if(enemyList[i].bullets[j].bulletShape.x > ship.x && enemyList[i].bullets[j].bulletShape.x < (ship.x + 35) && enemyList[i].bullets[j].bulletShape.y > ship.y && enemyList[i].bullets[j].bulletShape.y < (ship.y + 20)){
             var bullet = enemyList[i].bullets[j].bulletShape;                
-            if(ship.x - 12 >= bullet.x + bullet.getBounds().width ||
-                ship.x + ship.getBounds().width - 12 <= bullet.x ||
+            if(ship.x - 35 >= bullet.x + bullet.getBounds().width ||
+                ship.x + ship.getBounds().width - 35 <= bullet.x ||
                 ship.y - 5 >= bullet.y + bullet.getBounds().height ||
                 ship.y + ship.getBounds().height <= bullet.y) {
             } else {
@@ -592,7 +584,7 @@ function runGameTimer() {
             bullets.splice(i,1);  
             i--;
         } else {
-            bullets[i].y -= 10;
+            bullets[i].y -= 8;
         }
     }
 //    if(toRemove.length >= 1){
@@ -601,7 +593,7 @@ function runGameTimer() {
         clearScreen();
         state = gameMode.GAMEOVER;
     }
-}
+
 }
 
 function resetGameTimer() {
@@ -612,16 +604,15 @@ function resetGameTimer() {
 
 
 function shoot(time){
-    if(time > shootTime + shootSpeed){
-        var bullet = bulletOne.clone();
-        bullet.x = ship.x + 20;
-        bullet.y = ship.y + 5;
-        bullet.setBounds(bullet.x, bullet.y, 5, 5);
-        bullet.gotoAndPlay("pulse");
-        bullet.regX = bullet.getBounds().width/2;
-        bullet.regY = bullet.getBounds().height/2;
-        stage.addChild(bullet);
-        bullets.push(bullet); 
+    if(time > shootTime + shootSpeed) {
+        bulletOne.x = ship.x - 15;
+        bulletOne.y = ship.y - 2;
+        bulletOne.setBounds(bulletOne.x, bulletOne.y, 5, 5);
+        bulletOne.gotoAndPlay("pulse");
+        bulletOne.regX = bulletOne.getBounds().width/2;
+        bulletOne.regY = bulletOne.getBounds().height/2;
+        bullets.push(bulletOne.clone()); 
+        stage.addChild(bullets[bullets.length - 1]);
         shootTime = time;
     }
 }
