@@ -50,7 +50,7 @@ var level = 1;
 
 manifest = [
     {src:"images/title.jpg", id:"title"},
-    {src:"images/instruction.jpg", id:"instruction"},
+    {src:"images/instructions.jpg", id:"instruction"},
     {src:"images/space.png", id:"play"},
     {src:"images/shop.jpg", id:"shop"},
     {src:"images/gameover.jpg", id:"gameover"},
@@ -59,7 +59,7 @@ manifest = [
     {src:"images/playButton.jpg", id:"playButton"},
     {src:"images/menuButton.jpg", id:"menuButton"},
     //{src:"images/shopButton.jpg", id:"shopButton"},
-    {src:'images/Win.jpg', id:'winScreen'},
+    {src:'images/victory.jpg', id:'winScreen'},
     {src:"images/nextLevelButton.jpg", id:"nextLevelButton"},
     {src:"images/upgradeHealthButton.jpg", id:"upgradeHealthBtn"},
     {src:"images/upgradeSpeedButton.jpg", id:"upgradeSpeedBtn"},
@@ -547,11 +547,11 @@ function runGameTimer() {
     else{
         ship.gotoAndPlay("stand");
     }
-        if(ship.x + 15 > powerUp.x && ship.x + 15 < powerUp.x + 20 && ship.y + 15 > powerUp.y && ship.y + 15 < powerUp.y + 20){
+        /*if(ship.x + 15 > powerUp.x && ship.x + 15 < powerUp.x + 20 && ship.y + 15 > powerUp.y && ship.y + 15 < powerUp.y + 20){
             power_Up();
             console.log('powerup');
             stage.removeChild(powerUp);
-        }
+        }*/
 //        if(ship.x + 15 > powerUp.x && ship.x + 15 < powerUp.x + 20 && ship.y + 15 > powerUp.y && ship.y + 15 < powerUp.y + 20){
 //            power_Up();
 //            console.log('powerup');
