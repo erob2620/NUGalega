@@ -44,6 +44,7 @@ var powerUp;
 var bulletOne;
 var bullets;
 var enemySheet;
+var bossSheet;
 
 var level = 1;
 
@@ -69,7 +70,8 @@ manifest = [
     {src: 'scripts/bullet' + jsEnd},
     {src: 'images/bullet.png', id:'bullet'},
     {src:'images/enemies.png', id:'enemySprites'},
-    {src: 'scripts/powerup' + jsEnd}
+    {src: 'scripts/powerup' + jsEnd},
+    {src: 'images/boss.png', id:'boss'}
 ];
 
 function setupCanvas() {
@@ -203,8 +205,12 @@ function loadComplete(evt){
         animations: {pulse: [0,6,.25]}
     });
     
+    boss = new createjs.SpriteSheet({images: [queue.getResult("boss")], frames: [[0,0,296,98,0,148.3,54.35],[0,0,296,98,0,148.3,54.35],[296,0,296,98,0,148.3,54.35],[592,0,296,98,0,148.3,54.35],[0,98,296,98,0,148.3,54.35],[296,98,296,98,0,148.3,54.35],[592,98,296,98,0,148.3,54.35],[0,196,296,98,0,148.3,54.35],[296,196,296,98,0,148.3,54.35],[592,196,296,98,0,148.3,54.35],[0,294,296,98,0,148.3,54.35],[592,196,296,98,0,148.3,54.35],[296,196,296,98,0,148.3,54.35],[592,98,296,98,0,148.3,54.35],[296,294,296,98,0,148.3,54.35],[0,98,296,98,0,148.3,54.35],[592,294,296,98,0,148.3,54.35],[0,392,296,98,0,148.3,54.35],[296,392,296,98,0,148.3,54.35],[296,392,296,98,0,148.3,54.35],[592,392,296,98,0,148.3,54.35],[0,490,296,98,0,148.3,54.35],[592,392,296,98,0,148.3,54.35],[296,392,296,98,0,148.3,54.35],[296,490,296,98,0,148.3,54.35],[0,392,296,98,0,148.3,54.35],[592,294,296,98,0,148.3,54.35],[592,490,296,98,0,148.3,54.35],[0,588,296,98,0,148.3,54.35],[296,588,296,98,0,148.3,54.35],[296,588,296,98,0,148.3,54.35]],
+                                    animations: {pulse: [0,30,.5]}
+                                    });
+    
     enemySheet = new createjs.SpriteSheet({
-        images: [queu.getResult("enemySprites")],
+        images: [queue.getResult("enemySprites")],
         frames: [[0,0,35,22,0,17.85,9.1],[35,0,35,22,0,17.85,9.1],[70,0,35,22,0,17.85,9.1],[0,22,35,22,0,17.85,9.1],[35,22,35,22,0,17.85,9.1],[70,22,35,22,0,17.85,9.1],[0,44,35,22,0,17.85,9.1],[35,0,35,22,0,17.85,9.1],[0,0,35,22,0,17.85,9.1],[35,44,35,24,0,17.85,9.1],[70,44,35,24,0,17.85,9.1],[0,68,35,24,0,17.85,9.1],[35,68,35,24,0,17.85,9.1],[70,68,35,24,0,17.85,9.1],[35,68,35,24,0,17.85,9.1],[0,68,35,24,0,17.85,9.1],[70,44,35,24,0,17.85,9.1],[35,44,35,24,0,17.85,9.1],[0,92,35,22,0,17.85,9.1],[35,92,35,22,0,17.85,9.1],[35,92,35,22,0,17.85,9.1],[70,92,35,22,0,17.85,9.1],[0,114,35,22,0,17.85,9.1],[35,114,35,22,0,17.85,9.1],[70,114,35,22,0,17.85,9.1],[35,114,35,22,0,17.85,9.1],[0,114,35,22,0,17.85,9.1],[70,92,35,22,0,17.85,9.1],[35,92,35,22,0,17.85,9.1],[0,136,35,22,0,17.85,9.1]],
         animation: {
             typeOne: [0,6,.5],
@@ -216,9 +222,9 @@ function loadComplete(evt){
     ship.x = 390;
     ship.y = 510;
     stage.addChild(ship);
-    ship.setBounds(walk.x, walk.y, 35, 20);
-    ship.regX = walk.getBounds().width/2;
-    ship.regY = walk.getBounds().height/2;
+    ship.setBounds(ship.x, ship.y, 35, 20);
+    ship.regX = ship.getBounds().width/2;
+    ship.regY = ship.getBounds().height/2;
     hud = new createjs.Shape();
     hud.graphics.beginFill("#aaa").drawRect(0,0,100,300);
     hud.x = 700;
@@ -344,7 +350,7 @@ function showTitle(){
 }
 function showWin(){
     playing = false;
-    walk.visible = false;
+    ship.visible = false;
     titleScreen.visible = false;
     gameoverScreen.visible = false;
     backgroundScreen.visible = false;
@@ -554,7 +560,7 @@ function runGameTimer() {
             console.log('powerup');
             stage.removeChild(powerUp);
         }
-//        if(walk.x + 15 > powerUp.x && walk.x + 15 < powerUp.x + 20 && walk.y + 15 > powerUp.y && walk.y + 15 < powerUp.y + 20){
+//        if(ship.x + 15 > powerUp.x && ship.x + 15 < powerUp.x + 20 && ship.y + 15 > powerUp.y && ship.y + 15 < powerUp.y + 20){
 //            power_Up();
 //            console.log('powerup');
 //            stage.removeChild(powerUp);
@@ -567,10 +573,10 @@ function runGameTimer() {
         for(var j = 0; j < enemyList[i].bullets.length; j++){
             if(enemyList[i].bullets[j].bulletShape.x > ship.x && enemyList[i].bullets[j].bulletShape.x < (ship.x + 35) && enemyList[i].bullets[j].bulletShape.y > ship.y && enemyList[i].bullets[j].bulletShape.y < (ship.y + 20)){
             var bullet = enemyList[i].bullets[j].bulletShape;                
-            if(walk.x - 12 >= bullet.x + bullet.getBounds().width ||
-                walk.x + walk.getBounds().width - 12 <= bullet.x ||
-                walk.y - 5 >= bullet.y + bullet.getBounds().height ||
-                walk.y + walk.getBounds().height <= bullet.y) {
+            if(ship.x - 12 >= bullet.x + bullet.getBounds().width ||
+                ship.x + ship.getBounds().width - 12 <= bullet.x ||
+                ship.y - 5 >= bullet.y + bullet.getBounds().height ||
+                ship.y + ship.getBounds().height <= bullet.y) {
             } else {
                 enemyList[i].removeBullet(j);
                 j--;
