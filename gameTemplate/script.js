@@ -33,7 +33,8 @@ var speed;
 var moving;
 var bullets = [];
 var shooting;
-var health;
+var currentHealth;
+var maxHealth;
 var healthNodes = [];
 var hud;
 var attackPower;
@@ -47,6 +48,8 @@ var enemySheet;
 var bossSheet;
 var enemySprite;
 var level = 1;
+var shotSound;
+var deathSound;
 
 manifest = [
     {src:"images/title.jpg", id:"title"},
@@ -71,7 +74,9 @@ manifest = [
     {src: 'images/bullet.png', id:'bullet'},
     {src:'images/enemies.png', id:'enemySprites'},
     {src: 'scripts/powerup' + jsEnd},
-    {src: 'images/boss.png', id:'boss'}
+    {src: 'images/boss.png', id:'boss'},
+    {src: 'music/death.mp3', id:'deathSound'},
+    {src: 'music/shot.mp3', id:'shotSound'}
 ];
 
 function setupCanvas() {
@@ -100,6 +105,10 @@ function loadFiles(){
 
 function loadComplete(evt){
     createjs.Sound.play("music",{loop:-1});
+    shotSound = createjs.Sound.play("shotSound");
+    shotSound.volume = shotSound.volume * 2;
+    deathSound = createjs.Sound.play("deathSound");
+    deathSound.volume = deathSound.volume * 2;
     titleScreen = new createjs.Bitmap(queue.getResult("title"));
     backgroundScreen = new createjs.Bitmap(queue.getResult("play"));
     instructionScreen = new createjs.Bitmap(queue.getResult("instruction"));
@@ -113,7 +122,8 @@ function loadComplete(evt){
        level = 1;
         main();
         resetGameTimer(); 
-        health = 5;
+        currentHealth = 5;
+        maxHealth = 5;
         createHealth();
         state = gameMode.PLAY;
         stage.addChild(powerUp);
@@ -143,7 +153,8 @@ function loadComplete(evt){
         main();
         setupEnemies(level);
         resetGameTimer(); 
-        health = 5;
+        currentHealth = 5;
+        maxHealth = 5;
         createHealth();
         stage.addChild(powerUp);
         state = gameMode.PLAY;
@@ -243,7 +254,7 @@ function loadComplete(evt){
 }
 
 function createHealth(){
-    for(var i = 320; i < 420; i += 20){
+    for(var i = 320; i < (320 + (20 * currentHealth)); i += 20){
         var healthBlock = new createjs.Shape();
         healthBlock.graphics.beginFill("#f00").drawRect(0,0,20,20);
         healthBlock.x = 740;
@@ -252,7 +263,6 @@ function createHealth(){
         healthNodes.push(healthBlock);
     }
 }
-
 
 function writeTimer(){
     timer = new createjs.Text(gameTimer, "12px Arial", "#000000");
@@ -281,11 +291,11 @@ function addScore(increment){
 }
 
 function damage(time){
-    health--;
+    currentHealth--;
     stage.removeChild(healthNodes[0]);
     healthNodes.splice(0,1);
+    deathSound.play();
     //hitTime = time;
-    
     console.log(healthNodes.length);
 }
 
@@ -589,8 +599,9 @@ function runGameTimer() {
     }
 //    if(toRemove.length >= 1){
 //    }
-    if(health == 0){
+    if(currentHealth <= 0){
         clearScreen();
+        deathSound.play();
         state = gameMode.GAMEOVER;
     }
 
@@ -614,6 +625,7 @@ function shoot(time){
         bullets.push(bulletOne.clone()); 
         stage.addChild(bullets[bullets.length - 1]);
         shootTime = time;
+        shotSound.play();
     }
 }
     
@@ -657,7 +669,7 @@ function handleKeyDown(evt) {
         case KEYCODE_A:  left=true;return false;
         case KEYCODE_S:  down = true;return false;
         case KEYCODE_D:  right = true;return false;  
-        case KEYCODE_J: health = 10; attackPower = 5; return false;
+        case KEYCODE_J: Powerup.prototype.activate(); return false;
     }
     
 }
