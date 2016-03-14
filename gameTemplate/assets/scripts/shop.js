@@ -26,7 +26,6 @@ function regainHealth() {
 		console.log("score: " + score);
 		bulletSpeed += 1;
 		console.log("Bullet speed: " + bulletSpeed);
-	}
 }
 
 function regainHealth() {

@@ -50,7 +50,7 @@ var enemySprite;
 var level = 1;
 var shotSound;
 var deathSound;
-
+var bossSprite;
 manifest = [
     {src:"images/title.jpg", id:"title"},
     {src:"images/instructions.jpg", id:"instruction"},
@@ -74,6 +74,7 @@ manifest = [
     {src: 'images/bullet.png', id:'bullet'},
     {src:'images/enemies.png', id:'enemySprites'},
     {src: 'scripts/powerup' + jsEnd},
+    {src: 'scripts/boss' + jsEnd},
     {src: 'images/boss.png', id:'boss'},
     {src: 'music/death.mp3', id:'deathSound'},
     {src: 'music/shot.mp3', id:'shotSound'}
@@ -212,7 +213,7 @@ function loadComplete(evt){
         animations: {pulse: [0,6,.25]}
     });
     
-    boss = new createjs.SpriteSheet({images: [queue.getResult("boss")], frames: [[0,0,296,98,0,148.3,54.35],[0,0,296,98,0,148.3,54.35],[296,0,296,98,0,148.3,54.35],[592,0,296,98,0,148.3,54.35],[0,98,296,98,0,148.3,54.35],[296,98,296,98,0,148.3,54.35],[592,98,296,98,0,148.3,54.35],[0,196,296,98,0,148.3,54.35],[296,196,296,98,0,148.3,54.35],[592,196,296,98,0,148.3,54.35],[0,294,296,98,0,148.3,54.35],[592,196,296,98,0,148.3,54.35],[296,196,296,98,0,148.3,54.35],[592,98,296,98,0,148.3,54.35],[296,294,296,98,0,148.3,54.35],[0,98,296,98,0,148.3,54.35],[592,294,296,98,0,148.3,54.35],[0,392,296,98,0,148.3,54.35],[296,392,296,98,0,148.3,54.35],[296,392,296,98,0,148.3,54.35],[592,392,296,98,0,148.3,54.35],[0,490,296,98,0,148.3,54.35],[592,392,296,98,0,148.3,54.35],[296,392,296,98,0,148.3,54.35],[296,490,296,98,0,148.3,54.35],[0,392,296,98,0,148.3,54.35],[592,294,296,98,0,148.3,54.35],[592,490,296,98,0,148.3,54.35],[0,588,296,98,0,148.3,54.35],[296,588,296,98,0,148.3,54.35],[296,588,296,98,0,148.3,54.35]],
+    bossSheet = new createjs.SpriteSheet({images: [queue.getResult("boss")], frames: [[0,0,296,98,0,148.3,54.35],[0,0,296,98,0,148.3,54.35],[296,0,296,98,0,148.3,54.35],[592,0,296,98,0,148.3,54.35],[0,98,296,98,0,148.3,54.35],[296,98,296,98,0,148.3,54.35],[592,98,296,98,0,148.3,54.35],[0,196,296,98,0,148.3,54.35],[296,196,296,98,0,148.3,54.35],[592,196,296,98,0,148.3,54.35],[0,294,296,98,0,148.3,54.35],[592,196,296,98,0,148.3,54.35],[296,196,296,98,0,148.3,54.35],[592,98,296,98,0,148.3,54.35],[296,294,296,98,0,148.3,54.35],[0,98,296,98,0,148.3,54.35],[592,294,296,98,0,148.3,54.35],[0,392,296,98,0,148.3,54.35],[296,392,296,98,0,148.3,54.35],[296,392,296,98,0,148.3,54.35],[592,392,296,98,0,148.3,54.35],[0,490,296,98,0,148.3,54.35],[592,392,296,98,0,148.3,54.35],[296,392,296,98,0,148.3,54.35],[296,490,296,98,0,148.3,54.35],[0,392,296,98,0,148.3,54.35],[592,294,296,98,0,148.3,54.35],[592,490,296,98,0,148.3,54.35],[0,588,296,98,0,148.3,54.35],[296,588,296,98,0,148.3,54.35],[296,588,296,98,0,148.3,54.35]],
                                     animations: {pulse: [0,30,.5]}
                                     });
     
@@ -238,6 +239,7 @@ function loadComplete(evt){
     hud.y = 300;
     bulletOne = new createjs.Sprite(bullets);
     enemySprite = new createjs.Sprite(enemySheet);
+    bossSprite = new createjs.Sprite(bossSheet);
     stage.addChild(playButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
@@ -338,7 +340,7 @@ function showTitle(){
     playButton.visible = true;
     instructionButton.visible = true;
     menuButton.visible = false;
-    shopButton.visible = true;
+    shopButton.visible = false;
     nextLevelButton.visible = false;
 	upgradeSpeedBtn.visible = false;
 	upgradeBulletSpeedBtn.visible = false;
@@ -394,7 +396,7 @@ function showGame(){
     playButton.visible = false;
     instructionButton.visible = false;
     menuButton.visible = false;
-    shopButton.visible = true;
+    shopButton.visible = false;
     nextLevelButton.visible = false;
 	upgradeSpeedBtn.visible = false;
 	upgradeBulletSpeedBtn.visible = false;
@@ -409,7 +411,7 @@ function showGame(){
     	writeScore();
         console.log('you cleared the level');
         clearScreen();
-        if(level === 4) {
+        if(level === 5) {
             state = gameMode.WIN;
         } else {
             level += 1;
