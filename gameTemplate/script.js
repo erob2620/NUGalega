@@ -19,17 +19,17 @@ var gameMode = {
     GAMEOVER:4
 };
 var state;
-var score;
+var score = 0;
 var scoreText;
 var playButton;
 var instructionButton;
 var menuButton;
-//var shopButton;
+var shopButton;
 var upgradeSpeedBtn, upgradeHealthBtn, upgradeBulletSpeedBtn, regainHealthBtn;
 var cacheVersion = new Date().getTime();
 var jsEnd = '.js?a=' + cacheVersion;
 var left,right,up,down = false;
-var speed;
+var speed = 6;
 var moving;
 var bullets = [];
 var shooting;
@@ -61,7 +61,7 @@ manifest = [
     {src:"images/instructionButton.jpg", id:"instructionButton"},
     {src:"images/playButton.jpg", id:"playButton"},
     {src:"images/menuButton.jpg", id:"menuButton"},
-    //{src:"images/shopButton.jpg", id:"shopButton"},
+    {src:"images/shopButton.jpg", id:"shopButton"},
     {src:'images/victory.jpg', id:'winScreen'},
     {src:"images/nextLevelButton.jpg", id:"nextLevelButton"},
     {src:"images/upgradeHealthButton.jpg", id:"upgradeHealthBtn"},
@@ -104,9 +104,9 @@ function loadFiles(){
 }
 
 function loadComplete(evt){
-    createjs.Sound.play("music",{loop:-1});
-    shotSound = createjs.Sound.play("shotSound");
-    shotSound.volume = shotSound.volume * 2;
+    //createjs.Sound.play("music",{loop:-1});
+    //shotSound = createjs.Sound.play("shotSound");
+    //shotSound.volume = shotSound.volume * 2;
     deathSound = createjs.Sound.play("deathSound");
     deathSound.volume = deathSound.volume * 2;
     titleScreen = new createjs.Bitmap(queue.getResult("title"));
@@ -120,6 +120,7 @@ function loadComplete(evt){
     playButton.y = 540;  
     playButton.on("click", function(evt){
        level = 1;
+		speed = 6;
         main();
         resetGameTimer(); 
         currentHealth = 5;
@@ -140,16 +141,17 @@ function loadComplete(evt){
     menuButton.on("click",function(evt){
         state = gameMode.TITLE;
     });
-//	shopButton = new createjs.Bitmap(queue.getResult("shopButton"));
-//    shopButton.x = 40;
-//    shopButton.y = 540;
-//    shopButton.on("click",function(evt){
-//        state = gameMode.SHOP;
-//    });
+	shopButton = new createjs.Bitmap(queue.getResult("shopButton"));
+    shopButton.x = 40;
+    shopButton.y = 540;
+    shopButton.on("click",function(evt){
+        state = gameMode.SHOP;
+    });
 	nextLevelButton = new createjs.Bitmap(queue.getResult("nextLevelButton"));
     nextLevelButton.x = 700;
     nextLevelButton.y = 540; 
     nextLevelButton.on("click",function(evt){
+		console.log(score);
         main();
         setupEnemies(level);
         resetGameTimer(); 
@@ -159,26 +161,20 @@ function loadComplete(evt){
         stage.addChild(powerUp);
         state = gameMode.PLAY;
     });
-	upgradeHealthBtn = new createjs.Bitmap(queue.getResult("upgradeHealthBtn"));  
-    upgradeHealthBtn.x = 200;
-    upgradeHealthBtn.y = 270;
-    upgradeHealthBtn.on("click",function(evt){
-        upgradeHealth();
-    });
 	upgradeSpeedBtn = new createjs.Bitmap(queue.getResult("upgradeSpeedBtn"));  
-    upgradeSpeedBtn.x = 280;
+    upgradeSpeedBtn.x = 180;
     upgradeSpeedBtn.y = 270;
     upgradeSpeedBtn.on("click",function(evt){
         increaseSpeed();
     });
 	upgradeBulletSpeedBtn = new createjs.Bitmap(queue.getResult("upgradeBulletSpeedBtn"));  
-    upgradeBulletSpeedBtn.x = 360;
+    upgradeBulletSpeedBtn.x = 330;
     upgradeBulletSpeedBtn.y = 270;
     upgradeBulletSpeedBtn.on("click",function(evt){
         increaseBulletSpeed();
     });
 	regainHealthBtn = new createjs.Bitmap(queue.getResult("regainHealthBtn"));  
-    regainHealthBtn.x = 440;
+    regainHealthBtn.x = 480;
     regainHealthBtn.y = 270;
     regainHealthBtn.on("click",function(evt){
         regainHealth();
@@ -190,7 +186,7 @@ function loadComplete(evt){
     stage.addChild(gameoverScreen);
     stage.addChild(winScreen);
     stage.addChild(playButton);
-    //stage.addChild(shopButton);
+    stage.addChild(shopButton);
     stage.addChild(nextLevelButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
@@ -245,7 +241,6 @@ function loadComplete(evt){
     stage.addChild(playButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
-    stage.addChild(upgradeHealthBtn);
     stage.addChild(upgradeSpeedBtn);
     stage.addChild(upgradeBulletSpeedBtn);
     stage.addChild(regainHealthBtn);
@@ -280,6 +275,7 @@ function writeCoordinates(){
 }
 
 function writeScore(){
+	stage.removeChild(scoreText);
     scoreText = new createjs.Text("Score: " + score, "12px Arial", "#000000");
     scoreText.x = 730;
     scoreText.y = 500;
@@ -311,7 +307,6 @@ function main() {
     mouseInit();
     setupEnemies(level);
     state = gameMode.TITLE;
-    speed = 6;
     moving = false;
     shooting = false;
     createjs.Ticker.addEventListener("tick", loop);
@@ -335,9 +330,8 @@ function showTitle(){
     playButton.visible = true;
     instructionButton.visible = true;
     menuButton.visible = false;
-    //shopButton.visible = false;
+    shopButton.visible = true;
     nextLevelButton.visible = false;
-	upgradeHealthBtn.visible = false;
 	upgradeSpeedBtn.visible = false;
 	upgradeBulletSpeedBtn.visible = false;
 	regainHealthBtn.visible = false;
@@ -364,7 +358,6 @@ function showWin(){
     menuButton.visible = true;
     //shopButton.visible = false;
     nextLevelButton.visible = false;
-	upgradeHealthBtn.visible = false;
 	upgradeSpeedBtn.visible = false;
 	upgradeBulletSpeedBtn.visible = false;
 	regainHealthBtn.visible = false;
@@ -393,9 +386,8 @@ function showGame(){
     playButton.visible = false;
     instructionButton.visible = false;
     menuButton.visible = false;
-    //shopButton.visible = true;
+    shopButton.visible = true;
     nextLevelButton.visible = false;
-	upgradeHealthBtn.visible = false;
 	upgradeSpeedBtn.visible = false;
 	upgradeBulletSpeedBtn.visible = false;
 	regainHealthBtn.visible = false;
@@ -406,6 +398,7 @@ function showGame(){
         count = 0;
     } 
     if(isLevelCleared()) {
+    	writeScore();
         console.log('you cleared the level');
         clearScreen();
         if(level === 4) {
@@ -437,10 +430,8 @@ function showGameOver(){
     instructionButton.visible = true;
     menuButton.visible = true;
     winScreen.visible = false;
-
     //shopButton.visible = false;
 	nextLevelButton.visible = false;
-	upgradeHealthBtn.visible = false;
 	upgradeSpeedBtn.visible = false;
 	upgradeBulletSpeedBtn.visible = false;
 	regainHealthBtn.visible = false;
@@ -449,6 +440,8 @@ function showGameOver(){
         healthNodes[i].visible = false;
     }
     hud.visible = false;
+	score = 0;
+	speed = 6;
  //   powerUp.visible = false;
 }
 
@@ -491,7 +484,6 @@ function showShop(){
     menuButton.visible = false;
     //shopButton.visible = false;
 	nextLevelButton.visible = true;
-	upgradeHealthBtn.visible = true;
 	upgradeSpeedBtn.visible = true;
 	upgradeBulletSpeedBtn.visible = true;
 	regainHealthBtn.visible = true;
@@ -533,7 +525,6 @@ function loop() {
 var gameTimer;
 var frameCount = 0;
 function runGameTimer() {
-    stage.removeChild(scoreText);
     writeScore();
     frameCount += 1;
     if(frameCount%(FPS/10) === 0) {
@@ -610,7 +601,6 @@ function runGameTimer() {
 function resetGameTimer() {
     gameTimer = 0;
     frameCount = 0;
-    score = 0;
 }
 
 
@@ -625,7 +615,7 @@ function shoot(time){
         bullets.push(bulletOne.clone()); 
         stage.addChild(bullets[bullets.length - 1]);
         shootTime = time;
-        shotSound.play();
+        //shotSound.play();
     }
 }
     
