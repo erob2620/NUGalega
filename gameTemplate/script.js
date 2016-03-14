@@ -105,9 +105,9 @@ function loadFiles(){
 }
 
 function loadComplete(evt){
-    //createjs.Sound.play("music",{loop:-1});
-    //shotSound = createjs.Sound.play("shotSound");
-    //shotSound.volume = shotSound.volume * 2;
+    createjs.Sound.play("music",{loop:-1});
+    shotSound = createjs.Sound.play("shotSound");
+    shotSound.volume = shotSound.volume * 2;
     deathSound = createjs.Sound.play("deathSound");
     deathSound.volume = deathSound.volume * 2;
     titleScreen = new createjs.Bitmap(queue.getResult("title"));
@@ -625,7 +625,7 @@ function shoot(time){
         bullets.push(bulletOne.clone()); 
         stage.addChild(bullets[bullets.length - 1]);
         shootTime = time;
-        //shotSound.play();
+        shotSound.play();
     }
 }
     
