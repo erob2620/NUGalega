@@ -19,21 +19,22 @@ var gameMode = {
     GAMEOVER:4
 };
 var state;
-var score;
+var score = 0;
 var scoreText;
 var playButton;
 var instructionButton;
 var menuButton;
-//var shopButton;
+var shopButton;
 var upgradeSpeedBtn, upgradeHealthBtn, upgradeBulletSpeedBtn, regainHealthBtn;
 var cacheVersion = new Date().getTime();
 var jsEnd = '.js?a=' + cacheVersion;
 var left,right,up,down = false;
-var speed;
+var speed = 6;
 var moving;
 var bullets = [];
 var shooting;
-var health;
+var currentHealth;
+var maxHealth;
 var healthNodes = [];
 var hud;
 var attackPower;
@@ -44,12 +45,15 @@ var powerUp;
 var bulletOne;
 var bullets;
 var enemySheet;
+var bossSheet;
 var enemySprite;
 var level = 1;
+var shotSound;
+var deathSound;
 
 manifest = [
     {src:"images/title.jpg", id:"title"},
-    {src:"images/instruction.jpg", id:"instruction"},
+    {src:"images/instructions.jpg", id:"instruction"},
     {src:"images/space.png", id:"play"},
     {src:"images/shop.jpg", id:"shop"},
     {src:"images/gameover.jpg", id:"gameover"},
@@ -57,8 +61,8 @@ manifest = [
     {src:"images/instructionButton.jpg", id:"instructionButton"},
     {src:"images/playButton.jpg", id:"playButton"},
     {src:"images/menuButton.jpg", id:"menuButton"},
-    //{src:"images/shopButton.jpg", id:"shopButton"},
-    {src:'images/Win.jpg', id:'winScreen'},
+    {src:"images/shopButton.jpg", id:"shopButton"},
+    {src:'images/victory.jpg', id:'winScreen'},
     {src:"images/nextLevelButton.jpg", id:"nextLevelButton"},
     {src:"images/upgradeHealthButton.jpg", id:"upgradeHealthBtn"},
     {src:"images/upgradeSpeedButton.jpg", id:"upgradeSpeedBtn"},
@@ -69,7 +73,10 @@ manifest = [
     {src: 'scripts/bullet' + jsEnd},
     {src: 'images/bullet.png', id:'bullet'},
     {src:'images/enemies.png', id:'enemySprites'},
-    {src: 'scripts/powerup' + jsEnd}
+    {src: 'scripts/powerup' + jsEnd},
+    {src: 'images/boss.png', id:'boss'},
+    {src: 'music/death.mp3', id:'deathSound'},
+    {src: 'music/shot.mp3', id:'shotSound'}
 ];
 
 function setupCanvas() {
@@ -97,7 +104,11 @@ function loadFiles(){
 }
 
 function loadComplete(evt){
-    createjs.Sound.play("music",{loop:-1});
+    //createjs.Sound.play("music",{loop:-1});
+    //shotSound = createjs.Sound.play("shotSound");
+    //shotSound.volume = shotSound.volume * 2;
+    deathSound = createjs.Sound.play("deathSound");
+    deathSound.volume = deathSound.volume * 2;
     titleScreen = new createjs.Bitmap(queue.getResult("title"));
     backgroundScreen = new createjs.Bitmap(queue.getResult("play"));
     instructionScreen = new createjs.Bitmap(queue.getResult("instruction"));
@@ -109,9 +120,11 @@ function loadComplete(evt){
     playButton.y = 540;  
     playButton.on("click", function(evt){
        level = 1;
+		speed = 6;
         main();
         resetGameTimer(); 
-        health = 5;
+        currentHealth = 5;
+        maxHealth = 5;
         createHealth();
         state = gameMode.PLAY;
         stage.addChild(powerUp);
@@ -128,40 +141,40 @@ function loadComplete(evt){
     menuButton.on("click",function(evt){
         state = gameMode.TITLE;
     });
-//	shopButton = new createjs.Bitmap(queue.getResult("shopButton"));
-//    shopButton.x = 40;
-//    shopButton.y = 540;
-//    shopButton.on("click",function(evt){
-//        state = gameMode.SHOP;
-//    });
+	shopButton = new createjs.Bitmap(queue.getResult("shopButton"));
+    shopButton.x = 40;
+    shopButton.y = 540;
+    shopButton.on("click",function(evt){
+        state = gameMode.SHOP;
+    });
 	nextLevelButton = new createjs.Bitmap(queue.getResult("nextLevelButton"));
     nextLevelButton.x = 700;
     nextLevelButton.y = 540; 
     nextLevelButton.on("click",function(evt){
         nextLevelSetup();
+		console.log(score);
+        main();
+        setupEnemies(level);
+        resetGameTimer(); 
+        currentHealth = 5;
+        maxHealth = 5;
         createHealth();
         state = gameMode.PLAY;
     });
-	upgradeHealthBtn = new createjs.Bitmap(queue.getResult("upgradeHealthBtn"));  
-    upgradeHealthBtn.x = 200;
-    upgradeHealthBtn.y = 270;
-    upgradeHealthBtn.on("click",function(evt){
-        upgradeHealth();
-    });
 	upgradeSpeedBtn = new createjs.Bitmap(queue.getResult("upgradeSpeedBtn"));  
-    upgradeSpeedBtn.x = 280;
+    upgradeSpeedBtn.x = 180;
     upgradeSpeedBtn.y = 270;
     upgradeSpeedBtn.on("click",function(evt){
         increaseSpeed();
     });
 	upgradeBulletSpeedBtn = new createjs.Bitmap(queue.getResult("upgradeBulletSpeedBtn"));  
-    upgradeBulletSpeedBtn.x = 360;
+    upgradeBulletSpeedBtn.x = 330;
     upgradeBulletSpeedBtn.y = 270;
     upgradeBulletSpeedBtn.on("click",function(evt){
         increaseBulletSpeed();
     });
 	regainHealthBtn = new createjs.Bitmap(queue.getResult("regainHealthBtn"));  
-    regainHealthBtn.x = 440;
+    regainHealthBtn.x = 480;
     regainHealthBtn.y = 270;
     regainHealthBtn.on("click",function(evt){
         regainHealth();
@@ -173,7 +186,7 @@ function loadComplete(evt){
     stage.addChild(gameoverScreen);
     stage.addChild(winScreen);
     stage.addChild(playButton);
-    //stage.addChild(shopButton);
+    stage.addChild(shopButton);
     stage.addChild(nextLevelButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
@@ -198,6 +211,10 @@ function loadComplete(evt){
         frames:[[0,0,1,1,0,0.04999999999999982,0.04999999999999982],[1,0,2,2,0,1.0499999999999998,1.0499999999999998],[1,0,2,2,0,1.0499999999999998,1.0499999999999998],[3,0,5,5,0,2.05,2.05],[8,0,3,3,0,1.0499999999999998,1.0499999999999998],[1,0,2,2,0,1.0499999999999998,1.0499999999999998],[1,0,2,2,0,0.04999999999999982,0.04999999999999982]],
         animations: {pulse: [0,6,.25]}
     });
+    
+    boss = new createjs.SpriteSheet({images: [queue.getResult("boss")], frames: [[0,0,296,98,0,148.3,54.35],[0,0,296,98,0,148.3,54.35],[296,0,296,98,0,148.3,54.35],[592,0,296,98,0,148.3,54.35],[0,98,296,98,0,148.3,54.35],[296,98,296,98,0,148.3,54.35],[592,98,296,98,0,148.3,54.35],[0,196,296,98,0,148.3,54.35],[296,196,296,98,0,148.3,54.35],[592,196,296,98,0,148.3,54.35],[0,294,296,98,0,148.3,54.35],[592,196,296,98,0,148.3,54.35],[296,196,296,98,0,148.3,54.35],[592,98,296,98,0,148.3,54.35],[296,294,296,98,0,148.3,54.35],[0,98,296,98,0,148.3,54.35],[592,294,296,98,0,148.3,54.35],[0,392,296,98,0,148.3,54.35],[296,392,296,98,0,148.3,54.35],[296,392,296,98,0,148.3,54.35],[592,392,296,98,0,148.3,54.35],[0,490,296,98,0,148.3,54.35],[592,392,296,98,0,148.3,54.35],[296,392,296,98,0,148.3,54.35],[296,490,296,98,0,148.3,54.35],[0,392,296,98,0,148.3,54.35],[592,294,296,98,0,148.3,54.35],[592,490,296,98,0,148.3,54.35],[0,588,296,98,0,148.3,54.35],[296,588,296,98,0,148.3,54.35],[296,588,296,98,0,148.3,54.35]],
+                                    animations: {pulse: [0,30,.5]}
+                                    });
     
     enemySheet = new createjs.SpriteSheet({
         images: [queue.getResult("enemySprites")],
@@ -224,7 +241,6 @@ function loadComplete(evt){
     stage.addChild(playButton);
     stage.addChild(instructionButton);
     stage.addChild(menuButton);
-    stage.addChild(upgradeHealthBtn);
     stage.addChild(upgradeSpeedBtn);
     stage.addChild(upgradeBulletSpeedBtn);
     stage.addChild(regainHealthBtn);
@@ -233,7 +249,7 @@ function loadComplete(evt){
 }
 
 function createHealth(){
-    for(var i = 320; i < 420; i += 20){
+    for(var i = 320; i < (320 + (20 * currentHealth)); i += 20){
         var healthBlock = new createjs.Shape();
         healthBlock.graphics.beginFill("#f00").drawRect(0,0,20,20);
         healthBlock.x = 740;
@@ -242,7 +258,6 @@ function createHealth(){
         healthNodes.push(healthBlock);
     }
 }
-
 
 function writeTimer(){
     timer = new createjs.Text(gameTimer, "12px Arial", "#000000");
@@ -260,6 +275,7 @@ function writeCoordinates(){
 }
 
 function writeScore(){
+	stage.removeChild(scoreText);
     scoreText = new createjs.Text("Score: " + score, "12px Arial", "#000000");
     scoreText.x = 730;
     scoreText.y = 500;
@@ -271,11 +287,11 @@ function addScore(increment){
 }
 
 function damage(time){
-    health--;
+    currentHealth--;
     stage.removeChild(healthNodes[0]);
     healthNodes.splice(0,1);
+    deathSound.play();
     //hitTime = time;
-    
     console.log(healthNodes.length);
 }
 
@@ -299,7 +315,6 @@ function main() {
     mouseInit();
     setupEnemies(level);
     state = gameMode.TITLE;
-    speed = 6;
     moving = false;
     shooting = false;
     createjs.Ticker.addEventListener("tick", loop);
@@ -323,9 +338,8 @@ function showTitle(){
     playButton.visible = true;
     instructionButton.visible = true;
     menuButton.visible = false;
-    //shopButton.visible = false;
+    shopButton.visible = true;
     nextLevelButton.visible = false;
-	upgradeHealthBtn.visible = false;
 	upgradeSpeedBtn.visible = false;
 	upgradeBulletSpeedBtn.visible = false;
 	regainHealthBtn.visible = false;
@@ -352,7 +366,6 @@ function showWin(){
     menuButton.visible = true;
     //shopButton.visible = false;
     nextLevelButton.visible = false;
-	upgradeHealthBtn.visible = false;
 	upgradeSpeedBtn.visible = false;
 	upgradeBulletSpeedBtn.visible = false;
 	regainHealthBtn.visible = false;
@@ -381,9 +394,8 @@ function showGame(){
     playButton.visible = false;
     instructionButton.visible = false;
     menuButton.visible = false;
-    //shopButton.visible = true;
+    shopButton.visible = true;
     nextLevelButton.visible = false;
-	upgradeHealthBtn.visible = false;
 	upgradeSpeedBtn.visible = false;
 	upgradeBulletSpeedBtn.visible = false;
 	regainHealthBtn.visible = false;
@@ -394,6 +406,7 @@ function showGame(){
         count = 0;
     } 
     if(isLevelCleared()) {
+    	writeScore();
         console.log('you cleared the level');
         clearScreen();
         if(level === 4) {
@@ -425,10 +438,8 @@ function showGameOver(){
     instructionButton.visible = true;
     menuButton.visible = true;
     winScreen.visible = false;
-
     //shopButton.visible = false;
 	nextLevelButton.visible = false;
-	upgradeHealthBtn.visible = false;
 	upgradeSpeedBtn.visible = false;
 	upgradeBulletSpeedBtn.visible = false;
 	regainHealthBtn.visible = false;
@@ -437,6 +448,8 @@ function showGameOver(){
         healthNodes[i].visible = false;
     }
     hud.visible = false;
+	score = 0;
+	speed = 6;
  //   powerUp.visible = false;
 }
 
@@ -479,7 +492,6 @@ function showShop(){
     menuButton.visible = false;
     //shopButton.visible = false;
 	nextLevelButton.visible = true;
-	upgradeHealthBtn.visible = true;
 	upgradeSpeedBtn.visible = true;
 	upgradeBulletSpeedBtn.visible = true;
 	regainHealthBtn.visible = true;
@@ -521,7 +533,6 @@ function loop() {
 var gameTimer;
 var frameCount = 0;
 function runGameTimer() {
-    stage.removeChild(scoreText);
     writeScore();
     frameCount += 1;
     if(frameCount%(FPS/10) === 0) {
@@ -545,6 +556,11 @@ function runGameTimer() {
     else{
         ship.gotoAndPlay("stand");
     }
+        /*if(ship.x + 15 > powerUp.x && ship.x + 15 < powerUp.x + 20 && ship.y + 15 > powerUp.y && ship.y + 15 < powerUp.y + 20){
+            power_Up();
+            console.log('powerup');
+            stage.removeChild(powerUp);
+        }*/
 //        if(ship.x + 15 > powerUp.x && ship.x + 15 < powerUp.x + 20 && ship.y + 15 > powerUp.y && ship.y + 15 < powerUp.y + 20){
 //            power_Up();
 //            console.log('powerup');
@@ -582,8 +598,9 @@ function runGameTimer() {
     }
 //    if(toRemove.length >= 1){
 //    }
-    if(health == 0){
+    if(currentHealth <= 0){
         clearScreen();
+        deathSound.play();
         state = gameMode.GAMEOVER;
     }
 
@@ -592,7 +609,6 @@ function runGameTimer() {
 function resetGameTimer() {
     gameTimer = 0;
     frameCount = 0;
-    score = 0;
 }
 
 
@@ -607,6 +623,7 @@ function shoot(time){
         bullets.push(bulletOne.clone()); 
         stage.addChild(bullets[bullets.length - 1]);
         shootTime = time;
+        //shotSound.play();
     }
 }
     
@@ -650,7 +667,7 @@ function handleKeyDown(evt) {
         case KEYCODE_A:  left=true;return false;
         case KEYCODE_S:  down = true;return false;
         case KEYCODE_D:  right = true;return false;  
-        case KEYCODE_J: health = 10; attackPower = 5; return false;
+        case KEYCODE_J: Powerup.prototype.activate(); return false;
     }
     
 }
