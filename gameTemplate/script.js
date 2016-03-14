@@ -138,12 +138,8 @@ function loadComplete(evt){
     nextLevelButton.x = 700;
     nextLevelButton.y = 540; 
     nextLevelButton.on("click",function(evt){
-        main();
-        setupEnemies(level);
-        resetGameTimer(); 
-        health = 5;
+        nextLevelSetup();
         createHealth();
-        stage.addChild(powerUp);
         state = gameMode.PLAY;
     });
 	upgradeHealthBtn = new createjs.Bitmap(queue.getResult("upgradeHealthBtn"));  
@@ -285,6 +281,14 @@ function damage(time){
 
 function nextLevelSetup() {
 	console.log("Preparing next level...");
+    resetGameTimer();
+    createButtons(); 
+    writeCoordinates();
+    writeScore();
+    mouseInit();
+    setupEnemies(level);
+    shootTime = 0;
+    hitTime = 0;
 }
 
 function main() {
@@ -336,7 +340,7 @@ function showTitle(){
 }
 function showWin(){
     playing = false;
-    walk.visible = false;
+    ship.visible = false;
     titleScreen.visible = false;
     gameoverScreen.visible = false;
     backgroundScreen.visible = false;
@@ -557,7 +561,7 @@ function runGameTimer() {
             if(ship.x - 35 >= bullet.x + bullet.getBounds().width ||
                 ship.x + ship.getBounds().width - 35 <= bullet.x ||
                 ship.y - 5 >= bullet.y + bullet.getBounds().height ||
-                ship.y + ship.getBounds().height <= bullet.y) {
+                ship.y + ship.getBounds().height - 5 <= bullet.y) {
             } else {
                 enemyList[i].removeBullet(j);
                 j--;

@@ -7,17 +7,17 @@ function increaseSpeed() {
 
 function increaseBulletSpeed() {
 	if (checkScore()) {
-		bulletSpeed += 1;
-		console.log("Bullet speed: " + bulletSpeed);
+		if(shootSpeed > .3) shootSpeed -= .1;
+		console.log("Bullet speed: " + shootSpeed);
 	}
 }
 
 function upgradeHealth() {
-	
+	health++;
 }
 
 function regainHealth() {
-	
+	health++;
 }
 
 function checkScore() {

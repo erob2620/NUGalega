@@ -20,8 +20,6 @@ function Enemy(xPos, yPos, health, bulletMoveX, bulletMoveY, multipleBullets, sp
     this.shotTimer = 0;
     enemySprite.x = xPos;
     enemySprite.y = yPos;
-    
-    console.log(enemySprite);
     enemySprite.gotoAndPlay(sprite);
     this.rectangle = enemySprite.clone();
 //    this.rectangle = new createjs.Shape();
@@ -118,7 +116,7 @@ Enemy.prototype.move = function() {
             this.takeDamage();
             addScore(5);
             // if health goes below 0
-            if(this.health === 0) {
+            if(this.health <= 0) {
                 dropPowerup(this.xPos, this.yPos);
                 this.die();
                 addScore(15);
