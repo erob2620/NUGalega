@@ -162,16 +162,16 @@ function createEnemy() {
                 var enemy = new Enemy(11, 150, 3, 0, 8, true, 'typeTwo', enemySprite);
                 break;
             case 3:
-                var enemy = new Enemy(11, 150, 4, 4, 6, true, 'typeThree', enemySprite);
+                var enemy = new Enemy(11, 150, 3, 4, 6, true, 'typeThree', enemySprite);
                 break;
             case 4:
                 var random = Math.floor(Math.random() * 3);
                 if(random === 0) {
-                    var enemy = new Enemy(11, 150, 4, 0, 8, false, 'typeOne', enemySprite);
+                    var enemy = new Enemy(11, 150, 3, 0, 8, false, 'typeOne', enemySprite);
                 } else if(random === 1) {
-                    var enemy = new Enemy(11, 150, 4, 0, 8, true, 'typeTwo',enemySprite);
+                    var enemy = new Enemy(11, 150, 3, 0, 8, true, 'typeTwo',enemySprite);
                 } else {
-                    var enemy = new Enemy(11, 150, 4, 4, 6, true, 'typeThree', enemySprite);
+                    var enemy = new Enemy(11, 150, 3, 4, 6, true, 'typeThree', enemySprite);
                 }
                 break;
             case 5:

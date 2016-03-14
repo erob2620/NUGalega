@@ -1,4 +1,5 @@
 var powerupAvailable = true;
+var previousSpeed;
 function Powerup(x, y, type) {
     this.type = type;
     this.timeLeft = 3;
@@ -16,11 +17,12 @@ Powerup.prototype.spawn = function() {
     stage.addChild(this.rectangle);
 }
 Powerup.prototype.activate = function() {
+    previousSpeed = shootSpeed;
     shootSpeed = .1;
     this.isActive = true;
 }
 Powerup.prototype.deActivate = function() {
-    shootSpeed = 1;
+    shootSpeed = previousSpeed;
     powerupAvailable = true;
     this.isActive = false;
 }
@@ -57,5 +59,8 @@ Powerup.prototype.collisionDetection = function() {
 function clearPowerup() {
     if(powerup != undefined && powerup.rectangle.x != -50) {
         stage.removeChild(powerup.rectangle);
+    }
+    if(powerup != undefined && powerup.isActive) {
+        powerup.deActivate();
     }
 }

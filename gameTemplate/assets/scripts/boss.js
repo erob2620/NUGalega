@@ -112,8 +112,8 @@ Boss.prototype.collisionDetection = function(bullet) {
     //check the bounds of the enemy with reference to the bullet
     if(this.rectangle.x - 125 >= bullet.x + bullet.getBounds().width ||
        this.rectangle.x + this.rectangle.getBounds().width - 125 <= bullet.x ||
-       this.rectangle.y - 5 >= bullet.y + bullet.getBounds().height ||
-       this.rectangle.y + this.rectangle.getBounds().height <= bullet.y) return false;
+       this.rectangle.y - 25 >= bullet.y + bullet.getBounds().height ||
+       this.rectangle.y + this.rectangle.getBounds().height - 25 <= bullet.y) return false;
     return true;
 };
 
