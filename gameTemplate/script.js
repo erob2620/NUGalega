@@ -154,11 +154,10 @@ function loadComplete(evt){
     nextLevelButton.on("click",function(evt){
         nextLevelSetup();
 		console.log(score);
-        main();
         setupEnemies(level);
         resetGameTimer(); 
-        currentHealth = 5;
-        maxHealth = 5;
+        if (maxHealth < 10) maxHealth += 5;
+        currentHealth += 2;
         createHealth();
         state = gameMode.PLAY;
     });
@@ -285,7 +284,7 @@ function writeScore(){
 }
 
 function addScore(increment){
-    score += increment
+    score += increment;
 }
 
 function damage(time){
@@ -324,7 +323,7 @@ function main() {
     attackPower = 1;
     hitTime = 0;
     shootTime = 0;
-    shootSpeed = .5;
+    shootSpeed = 1;
 }
 
 function showTitle(){
